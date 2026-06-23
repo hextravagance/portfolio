@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio | MMI 2ème</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #000;
+            background: #ffffff;
+            user-select: none;
+        }
+
+        /* ── Canvas for connection lines (les traits) ── */
+        #network-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* ── Container for all nodes ── */
+        #nodes-container {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        #nodes-world {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+        }
+
+        /* ── Node générique ── */
+        .node {
+            position: absolute;
+            will-change: transform;
+            transition: filter 0.3s ease;
+        }
+
+        /* ── Node central : MMI 2ÈME ── */
+        .center-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .center-node .c-title {
+            font-size: 3.4em;
+            font-weight: 800;
+            letter-spacing: 2px;
+            line-height: 0.95;
+        }
+
+        .center-node .c-sub {
+            font-size: 1.05em;
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: rgba(0, 0, 0, 0.45);
+            margin-top: 8px;
+        }
+
+        /* ── Node compétence : boîte bordée ── */
+        .skill-node {
+            cursor: pointer;
+        }
+
+        .skill-frame {
+            border: 1.5px solid #000;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 18px 22px;
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                        background 0.3s ease, color 0.3s ease;
+        }
+
+        .skill-node:hover .skill-frame {
+            transform: scale(1.06);
+            background: #000;
+            color: #fff;
+        }
+
+        .skill-name {
+            font-size: 1.05em;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+        }
+
+        .skill-sub {
+            font-size: 0.66em;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: rgba(0, 0, 0, 0.4);
+            margin-top: 6px;
+            max-width: 150px;
+            transition: color 0.3s ease;
+        }
+
+        .skill-node:hover .skill-sub {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* ── Hint bas de page ── */
+        #hint {
+            position: fixed;
+            bottom: 26px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            font-size: 0.72em;
+            letter-spacing: 1.5px;
+            color: rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+        }
+
+        /* ── Cache noir anti-flash (présent dès le 1er paint) ──
+           Retiré par JS une fois que la transition WebGL recouvre l'écran. */
+        #boot-cover {
+            position: fixed;
+            inset: 0;
+            z-index: 190;
+            background: #000;
+            pointer-events: none;
+        }
+
+        /* ── Loading ── */
+        #loading {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            transition: opacity 0.6s ease;
+        }
+
+        #loading.done {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            display: flex;
+            gap: 5px;
+        }
+
+        .loader span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #000;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .loader span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .loader span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="network-canvas"></canvas>
+
+    <div id="nodes-container">
+        <div id="nodes-world"></div>
+    </div>
+
+    <div id="hint">Choisis une compétence</div>
+
+    <div id="loading">
+        <div class="loader"><span></span><span></span><span></span></div>
+    </div>
+
+    <div id="boot-cover"></div>
+
+    <script src="hub.js" type="module"></script>
+</body>
+
+</html>
