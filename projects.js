@@ -19,11 +19,108 @@ const counterAccce  = document.getElementById('counter-accce');
 const counterIdx    = document.getElementById('counter-idx');
 
 const projectDetail = document.getElementById('project-detail');
-const pdMainImg     = document.getElementById('pd-main-img');
-const pdCaption     = document.getElementById('pd-caption');
-const pdThumbs      = document.getElementById('pd-thumbs');
-const pdContent     = document.getElementById('pd-content');
+const pdContainer   = document.getElementById('pd-container');
 const btnBack       = document.getElementById('btn-back');
+
+const lightbox      = document.getElementById('lightbox');
+const lightboxImg   = lightbox.querySelector('img');
+const lightboxClose = document.getElementById('lightbox-close');
+
+// Intervalles de diaporama actifs (nettoyés à la fermeture du détail).
+let slideshowTimers = [];
+
+function openLightbox(src, alt) {
+  lightboxImg.src = src;
+  lightboxImg.alt = alt || '';
+  lightbox.classList.add('open');
+}
+function closeLightbox() {
+  lightbox.classList.remove('open');
+}
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightboxImg) return; // clic sur l'image : ne pas fermer
+  closeLightbox();
+});
+lightboxClose.addEventListener('click', closeLightbox);
+// Capture-phase : si le lightbox est ouvert, Échap le ferme SANS fermer le détail.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && lightbox.classList.contains('open')) {
+    e.stopImmediatePropagation();
+    closeLightbox();
+  }
+}, true);
+
+// Démarre chaque diaporama [data-slideshow] présent dans le conteneur.
+function initSlideshows(root) {
+  root.querySelectorAll('[data-slideshow]').forEach((box) => {
+    const slides = [...box.querySelectorAll('.pd-slide')];
+    const dots   = [...box.querySelectorAll('.pd-slideshow-dots span')];
+    if (slides.length < 2) return;
+
+    const delay = parseInt(box.dataset.interval, 10) || 3000;
+    let idx = 0;
+
+    const timer = setInterval(() => {
+      slides[idx].classList.remove('is-active');
+      dots[idx]?.classList.remove('is-active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('is-active');
+      dots[idx]?.classList.add('is-active');
+    }, delay);
+    slideshowTimers.push(timer);
+
+    const enlarge = () => openLightbox(slides[idx].src, slides[idx].alt);
+    box.addEventListener('click', enlarge);
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); enlarge(); }
+    });
+  });
+}
+
+function clearSlideshows() {
+  slideshowTimers.forEach(clearInterval);
+  slideshowTimers = [];
+}
+
+// Active chaque comparateur avant/après [data-baslider] (glissé souris/tactile + flèches).
+function initBaSliders(root) {
+  root.querySelectorAll('[data-baslider]').forEach((el) => {
+    const before  = el.querySelector('.ba-before');
+    const divider = el.querySelector('.ba-divider');
+    const grip    = el.querySelector('.ba-grip');
+    if (!before || !divider) return;
+
+    let pos = 50;
+    const setPos = (pct) => {
+      pos = Math.max(0, Math.min(100, pct));
+      before.style.clipPath = `inset(0 ${100 - pos}% 0 0)`;
+      divider.style.left = pos + '%';
+      if (grip) grip.style.left = pos + '%';
+    };
+    const fromEvent = (e) => {
+      const rect = el.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      setPos(((cx - rect.left) / rect.width) * 100);
+    };
+
+    el.addEventListener('pointerdown', (e) => {
+      fromEvent(e);
+      const move = (ev) => { fromEvent(ev); ev.preventDefault(); };
+      const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft')  { setPos(pos - 4); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { setPos(pos + 4); e.preventDefault(); }
+    });
+
+    setPos(50);
+  });
+}
 
 // ── Géométrie cascade (cartes rectangulaires) ──
 const CARD_W       = 720;
@@ -246,68 +343,133 @@ function esc(s) {
     .replace(/"/g, '&quot;');
 }
 
-// Placeholder pour la « preuve » (image-trace à venir).
-function proofPlaceholder() {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 405">
-    <rect width="720" height="405" fill="#ececec"/>
-    <rect x="2" y="2" width="716" height="401" fill="none" stroke="rgba(0,0,0,0.22)" stroke-dasharray="11 9" stroke-width="2"/>
-    <text x="360" y="210" text-anchor="middle" font-family="Inter,sans-serif" font-size="24" font-weight="600" letter-spacing="3" fill="#aaa">PREUVE - A VENIR</text>
-  </svg>`;
-  return 'data:image/svg+xml,' + encodeURIComponent(svg);
-}
-
-function accRow(item) {
-  const muted = !item.code;
-  return `<div class="accce-row"><span class="accce-code${muted ? ' muted' : ''}">${esc(item.code || '—')}</span><span class="accce-text">${esc(item.label)}</span></div>`;
-}
-
 function openDetail(project) {
   detailOpen = true;
 
-  // ── Galerie : aperçu du projet + preuve ──
-  const proofSrc = project.proofImage && project.proofImage.trim() ? project.proofImage : proofPlaceholder();
-  const gallery = [
-    { src: coverFor(project), label: 'Aperçu du projet' },
-    { src: proofSrc, label: project.proof ? `Preuve — ${project.proof}` : 'Preuve' },
-  ];
-
-  function showImg(i) {
-    pdMainImg.src = gallery[i].src;
-    pdMainImg.onerror = () => { pdMainImg.onerror = null; pdMainImg.src = placeholder(project.title); };
-    pdCaption.textContent = gallery[i].label;
-    [...pdThumbs.children].forEach((t, k) => t.classList.toggle('active', k === i));
+  const eyebrow = [skill.label, project.context, project.role, project.year].filter(Boolean).join('  ·  ');
+  
+  const allAcCe = [...(project.ces || []), ...(project.acs || [])];
+  let metaHtml = '';
+  if (allAcCe.length > 0) {
+    metaHtml = allAcCe.map(i => `<div class="pd-meta-item"><span class="pd-meta-accent">${i.code}</span> ${(i.label || '').toUpperCase()}</div>`).join('');
   }
 
-  pdThumbs.innerHTML = gallery
-    .map((g, i) => `<div class="pd-thumb${i === 0 ? ' active' : ''}" data-i="${i}"><img src="${esc(g.src)}" alt="" /></div>`)
-    .join('');
-  [...pdThumbs.children].forEach((t) => t.addEventListener('click', () => showImg(parseInt(t.dataset.i, 10))));
-  showImg(0);
-
-  // ── Contenu ──
-  const eyebrow = [skill.label, project.context].filter(Boolean).join('  ·  ');
-  const sub = [project.role, project.year].filter(Boolean).join('  ·  ');
-  const acRows = (project.acs || []).map(accRow).join('');
-  const ceRows = (project.ces || []).map(accRow).join('');
+  const skillIndex = SKILLS.indexOf(skill);
+  const coverSrc = `img/${skillIndex + 1}/main.png`;
+  const proofSrc = project.proofImage && project.proofImage.trim() ? project.proofImage : null;
   const tags = (project.tags || []).map((t) => `<span class="tag">${esc(t)}</span>`).join('');
   const links = (project.links || [])
     .map((l, i) => `<a class="link-btn${i > 0 ? ' ghost' : ''}" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.label)}</a>`)
     .join('');
 
   const html = [];
+  
+  html.push(`<div class="pd-header">`);
   html.push(`<div class="pd-eyebrow">${esc(eyebrow)}</div>`);
-  html.push(`<h2 class="pd-title">${esc(project.title)}</h2>`);
-  if (sub) html.push(`<div class="pd-sub">${esc(sub)}</div>`);
-  if (project.description) html.push(`<div class="pd-section"><div class="pd-label">Situation</div><div class="pd-text">${esc(project.description)}</div></div>`);
-  if (acRows) html.push(`<div class="pd-section"><div class="pd-label">Apprentissages critiques (AC)</div>${acRows}</div>`);
-  if (ceRows) html.push(`<div class="pd-section"><div class="pd-label">Composantes essentielles (CE)</div>${ceRows}</div>`);
-  if (project.justification) html.push(`<div class="pd-section"><div class="pd-label">Pourquoi ces AC / CE ?</div><div class="pd-justif">${esc(project.justification)}</div></div>`);
-  if (project.critique) html.push(`<div class="pd-section"><div class="pd-label">Prise de recul</div><div class="pd-critique">${esc(project.critique)}</div></div>`);
-  if (tags) html.push(`<div class="pd-section pd-tags">${tags}</div>`);
-  if (links) html.push(`<div class="pd-links">${links}</div>`);
+  html.push(`<h2 class="pd-title" style="margin-bottom: 16px;">${esc(project.title)}</h2>`);
+  if (tags) html.push(`<div class="pd-tags" style="margin-bottom: 24px;">${tags}</div>`);
+  if (metaHtml) html.push(`<div class="pd-meta-row">${metaHtml}</div>`);
+  html.push(`</div>`);
 
-  pdContent.innerHTML = html.join('');
-  pdContent.scrollTop = 0;
+  html.push(`<div class="pd-hero"><img src="${esc(coverSrc)}" alt=""/></div>`);
+
+  html.push(`<div class="pd-content-block">`);
+  
+  if (project.contentHtml) {
+    html.push(project.contentHtml);
+  } else {
+    const chapters = [];
+    if (project.description) {
+      chapters.push({
+        eyebrow: 'Démarche',
+        title: 'Contexte & approche',
+        body: `<p class="pd-lead">${esc(project.description)}</p>`,
+      });
+    }
+
+    if (proofSrc || project.proof) {
+      const proofMedia = proofSrc
+        ? `<div class="pd-proof-frame"><img src="${esc(proofSrc)}" alt=""/></div>`
+        : `<div class="pd-proof-frame"><div class="pd-proof-placeholder">Visuel à venir</div></div>`;
+      chapters.push({
+        eyebrow: 'Trace',
+        title: 'La preuve',
+        body: `
+          <figure class="pd-proof-figure">
+            ${proofMedia}
+            ${project.proof ? `<figcaption class="pd-proof-figcaption">${esc(project.proof)}</figcaption>` : ''}
+          </figure>
+        `,
+      });
+    }
+
+    if (project.justification) {
+      const codePills = allAcCe
+        .filter((i) => i.code)
+        .map((i) => `<span class="code-pill">${esc(i.code)}</span>`)
+        .join('');
+      chapters.push({
+        eyebrow: 'Référentiel',
+        title: 'Pourquoi ces AC / CE',
+        body: `
+          <div class="pd-justif-card">
+            ${codePills ? `<div class="pd-justif-card-codes">${codePills}</div>` : ''}
+            <div class="pd-justif-card-label">Justification</div>
+            <p>${esc(project.justification)}</p>
+          </div>
+        `,
+      });
+    }
+
+    if (project.critique) {
+      chapters.push({
+        eyebrow: 'Réflexion',
+        title: 'Prise de recul',
+        body: `<div class="pd-critique-callout"><p>${esc(project.critique)}</p></div>`,
+      });
+    }
+
+    chapters.forEach((ch, i) => {
+      const num = String(i + 1).padStart(2, '0');
+      html.push(`
+        <section class="pd-chapter">
+          <div class="pd-chapter-num">${num}</div>
+          <div class="pd-chapter-body">
+            <div class="pd-chapter-eyebrow">${esc(ch.eyebrow)}</div>
+            <h3 class="pd-chapter-title">${esc(ch.title)}</h3>
+            ${ch.body}
+          </div>
+        </section>
+      `);
+    });
+  }
+
+  if (links) {
+    html.push(`<div class="pd-footer">`);
+    html.push(`<div class="pd-links">${links}</div>`);
+    html.push(`</div>`);
+  }
+  
+  html.push(`</div>`);
+
+  pdContainer.innerHTML = html.join('');
+  projectDetail.scrollTop = 0;
+
+  clearSlideshows();
+  initSlideshows(pdContainer);
+  initBaSliders(pdContainer);
+
+  const proofFrames = pdContainer.querySelectorAll('.pd-proof-frame');
+  proofFrames.forEach(frame => {
+    // Le diaporama gère déjà son propre clic ; le comparateur avant/après se manipule au glissé.
+    if (frame.classList.contains('pd-slideshow') || frame.querySelector('[data-baslider]')) return;
+    frame.addEventListener('click', () => {
+      const activeImg = frame.querySelector('img.is-active') || frame.querySelector('img');
+      if (activeImg && activeImg.src) {
+        openLightbox(activeImg.src);
+      }
+    });
+  });
 
   projectDetail.classList.add('open');
 }
@@ -315,4 +477,6 @@ function openDetail(project) {
 function closeDetail() {
   projectDetail.classList.remove('open');
   detailOpen = false;
+  closeLightbox();
+  clearSlideshows();
 }

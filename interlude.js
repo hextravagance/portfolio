@@ -58,8 +58,8 @@ const index = SKILLS.findIndex((s) => s.slug === skill.slug);
 elIndex.textContent = `${String(index + 1).padStart(2, '0')} / ${String(SKILLS.length).padStart(2, '0')}`;
 elTitle.textContent = skill.label;
 elObj.textContent = skill.description || skill.subtitle || '';
-renderItems(elAcs, aggregate('acs'));
-renderItems(elCes, aggregate('ces'));
+renderItems(elAcs, skill.acs && skill.acs.length ? skill.acs : aggregate('acs'));
+renderItems(elCes, skill.ces && skill.ces.length ? skill.ces : aggregate('ces'));
 
 document.title = `Portfolio — ${skill.label}`;
 

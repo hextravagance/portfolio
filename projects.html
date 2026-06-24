@@ -151,210 +151,432 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* ── Détail projet : éditorial plein écran 2 colonnes ── */
+    /* ── Détail projet : pleine page déroulante ── */
     #project-detail {
-      position: fixed;
-      inset: 0;
-      z-index: 60;
+      position: fixed; inset: 0; z-index: 60;
       background: #fff;
-      display: flex;
-      overflow: hidden;
-      opacity: 0;
-      pointer-events: none;
+      display: block;
+      overflow-y: auto;
+      opacity: 0; pointer-events: none;
       transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
     #project-detail.open { opacity: 1; pointer-events: auto; }
+    #project-detail::-webkit-scrollbar { width: 6px; }
+    #project-detail::-webkit-scrollbar-track { background: transparent; }
+    #project-detail::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
 
     #btn-back {
-      position: fixed;
-      left: 24px;
-      top: 24px;
-      width: 42px;
-      height: 42px;
-      background: rgba(255,255,255,0.92);
-      color: #000;
-      border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.25s ease, background 0.25s ease;
-      z-index: 20;
+      position: fixed; left: 40px; top: 34px; z-index: 70;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.72em; text-transform: uppercase;
+      letter-spacing: 1.5px; color: rgba(0,0,0,0.45); text-decoration: none;
+      background: none; border: none; cursor: pointer; padding: 0;
+      transition: color 0.2s ease;
     }
-    #btn-back:hover { transform: scale(1.08); background: #fff; }
-    #btn-back svg { width: 20px; height: 20px; }
+    #btn-back:hover { color: #000; }
+    #btn-back svg { width: 14px; height: 14px; }
 
-    /* Colonne média (gauche) */
-    .pd-media {
-      width: 48%;
-      flex-shrink: 0;
-      background: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 56px;
-      gap: 20px;
-      transform: scale(1.02);
-      opacity: 0;
-      transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease;
-    }
-    #project-detail.open .pd-media { transform: scale(1); opacity: 1; }
-
-    .pd-media-main {
-      width: 100%;
-      max-width: 640px;
-      aspect-ratio: 16 / 9;
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 18px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.06);
-      background: #fff;
-    }
-    .pd-media-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-    .pd-caption {
-      font-size: 0.78em;
-      letter-spacing: 0.5px;
-      color: rgba(0,0,0,0.45);
-      text-align: center;
-    }
-
-    .pd-thumbs { display: flex; gap: 10px; }
-    .pd-thumb {
-      width: 84px;
-      aspect-ratio: 16 / 9;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
-      border: 2px solid transparent;
-      opacity: 0.5;
-      transition: opacity 0.2s ease, border-color 0.2s ease;
-      background: #fff;
-    }
-    .pd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .pd-thumb:hover { opacity: 0.85; }
-    .pd-thumb.active { opacity: 1; border-color: #000; }
-
-    /* Colonne contenu (droite) */
-    .pd-content {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 80px 72px 64px;
-      transform: translateX(24px);
-      opacity: 0;
+    .pd-container {
+      max-width: 1040px; margin: 0 auto;
+      padding: 100px 40px 120px;
+      transform: translateY(24px); opacity: 0;
       transition: transform 0.6s cubic-bezier(0.22,1,0.36,1) 0.08s, opacity 0.5s ease 0.08s;
     }
-    #project-detail.open .pd-content { transform: translateX(0); opacity: 1; }
-    .pd-content::-webkit-scrollbar { width: 4px; }
-    .pd-content::-webkit-scrollbar-track { background: transparent; }
-    .pd-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
+    #project-detail.open .pd-container { transform: translateY(0); opacity: 1; }
 
+    .pd-header { margin-bottom: 40px; }
     .pd-eyebrow {
-      font-size: 0.72em;
-      font-weight: 600;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.4);
-      margin-bottom: 14px;
+      font-size: 0.75em; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(0,0,0,0.4);
+      margin-bottom: 16px;
     }
     .pd-title {
-      font-size: clamp(2em, 3.4vw, 2.9em);
-      font-weight: 800;
-      line-height: 1.05;
-      margin-bottom: 8px;
+      font-size: clamp(2.5em, 5vw, 4.2em); font-weight: 800;
+      line-height: 1.05; margin-bottom: 24px; letter-spacing: -0.5px;
     }
-    .pd-sub {
-      font-size: 0.95em;
-      color: rgba(0,0,0,0.45);
-      margin-bottom: 36px;
+    .pd-meta-row {
+      display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+      font-size: 0.72em; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(0,0,0,0.4);
+      line-height: 1.6;
     }
-    /* ── Sections du contenu ── */
-    .pd-section { margin-bottom: 30px; }
+    .pd-meta-item { display: block; }
+    .pd-meta-accent { color: #000; }
+
+    .pd-hero {
+      width: 100%;
+      border-radius: 6px; overflow: hidden;
+      margin-bottom: 64px;
+    }
+    .pd-hero img { width: 100%; height: auto; display: block; }
+
+    .pd-content-block { max-width: 820px; margin: 0 auto; }
+
+    .pd-section { margin-bottom: 48px; }
     .pd-label {
-      font-size: 0.7em;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: rgba(0,0,0,0.32);
-      margin-bottom: 12px;
+      font-size: 1.3em; font-weight: 800; letter-spacing: -0.2px;
+      color: #000; margin-bottom: 16px;
     }
     .pd-text {
-      font-size: 1em;
-      line-height: 1.65;
-      color: rgba(0,0,0,0.78);
-      max-width: 580px;
+      font-size: 1.05em; line-height: 1.7; color: rgba(0,0,0,0.75);
     }
 
-    /* AC / CE : lignes éditoriales */
-    .accce-row {
-      display: flex;
-      gap: 14px;
-      align-items: baseline;
-      padding: 10px 0;
-      border-top: 1px solid rgba(0,0,0,0.08);
+    /* ── Chapitres éditoriaux (rendu par défaut) ── */
+    .pd-chapter {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 24px;
+      margin-bottom: 80px;
+      align-items: start;
     }
-    .accce-row:first-child { border-top: none; }
-    .accce-code {
-      font-size: 0.8em;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
+    .pd-chapter-num {
+      font-size: 0.78em; font-weight: 700; letter-spacing: 2px;
+      color: rgba(0,0,0,0.3);
+      font-variant-numeric: tabular-nums;
+      padding-top: 14px;
+      border-top: 1px solid #000;
+    }
+    .pd-chapter-body { min-width: 0; }
+    .pd-chapter-eyebrow {
+      font-size: 0.72em; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(0,0,0,0.4);
+      margin-bottom: 10px;
+    }
+    .pd-chapter-title {
+      font-size: 1.9em; font-weight: 800; letter-spacing: -0.4px;
+      line-height: 1.1; margin-bottom: 24px; color: #000;
+    }
+
+    /* Amorce (description avec drop cap) */
+    .pd-lead {
+      font-size: 1.15em; line-height: 1.65; color: rgba(0,0,0,0.78);
+    }
+    .pd-lead::first-letter {
+      float: left; font-size: 3.6em; font-weight: 800;
+      line-height: 0.9; padding: 4px 12px 0 0;
+      color: #000;
+    }
+
+    /* Sens critique : grille stylisée */
+    .pd-critique-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+      padding: 40px 0; border-top: 1px solid rgba(0,0,0,0.1); border-bottom: 1px solid rgba(0,0,0,0.1);
+      margin: 64px 0;
+    }
+    .pd-critique-col h4 {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.72em; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #000; margin-bottom: 16px;
+    }
+    .pd-critique-col h4::before {
+      content: ''; display: block; width: 6px; height: 6px; border-radius: 50%; background: #000;
+    }
+    .pd-critique-col p {
+      font-size: 0.95em; line-height: 1.6; color: rgba(0,0,0,0.65);
+    }
+
+    /* Callout "prise de recul" (rendu par défaut) */
+    .pd-critique-callout {
+      position: relative;
+      padding: 28px 32px 28px 40px;
+      border-left: 2px solid #000;
+      background: linear-gradient(90deg, rgba(0,0,0,0.025), transparent 60%);
+    }
+    .pd-critique-callout::before {
+      content: '“';
+      position: absolute;
+      left: 16px; top: -8px;
+      font-family: Georgia, serif;
+      font-size: 3em; line-height: 1; font-weight: 700;
+      color: rgba(0,0,0,0.18);
+    }
+    .pd-critique-callout p {
+      font-size: 1.02em; line-height: 1.65; color: rgba(0,0,0,0.78);
+      font-style: italic;
+    }
+
+    /* Image Proof inline */
+    .pd-proof { margin: 64px 0; border-radius: 6px; overflow: hidden; background: #f9f9f9; }
+    .pd-proof img { width: 100%; height: auto; display: block; }
+    .pd-caption { padding: 16px; font-size: 0.8em; text-align: center; color: rgba(0,0,0,0.45); }
+
+    /* Variante figure (rendu par défaut) */
+    .pd-proof-figure { margin: 0; }
+    .pd-proof-frame {
+      position: relative;
+      border-radius: 6px; overflow: hidden;
+      background: #f5f5f5;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 2px 10px rgba(0,0,0,0.04);
+      cursor: zoom-in;
+    }
+    .pd-proof-frame::after {
+      content: '';
+      position: absolute; inset: 0;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06);
+      border-radius: 6px; pointer-events: none;
+    }
+    .pd-proof-placeholder {
+      aspect-ratio: 16 / 9;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(0,0,0,0.25);
+      font-size: 0.75em; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase;
+      background:
+        repeating-linear-gradient(45deg, transparent 0 10px, rgba(0,0,0,0.03) 10px 11px),
+        #f7f7f7;
+    }
+    .pd-proof-figure img { width: 100%; height: auto; display: block; }
+    .pd-proof-figcaption {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-top: 14px;
+      font-size: 0.82em; color: rgba(0,0,0,0.55); line-height: 1.5;
+    }
+    .pd-proof-figcaption::before {
+      content: 'PREUVE';
       flex-shrink: 0;
-      min-width: 66px;
+      font-size: 0.78em; font-weight: 700; letter-spacing: 1.5px;
+      color: #000;
+      padding: 3px 8px;
+      background: #000; color: #fff;
+      border-radius: 3px;
+      letter-spacing: 1.2px;
     }
-    .accce-code.muted { color: rgba(0,0,0,0.3); }
-    .accce-text { font-size: 0.9em; line-height: 1.45; color: rgba(0,0,0,0.62); }
 
-    /* Justification : citation à filet */
-    .pd-justif {
-      font-size: 0.96em;
-      line-height: 1.65;
-      color: rgba(0,0,0,0.82);
-      padding: 4px 0 4px 20px;
-      border-left: 3px solid #000;
-      max-width: 580px;
+    /* AC/CE Justification inline */
+    .pd-justif-box {
+      background: #fafafa; padding: 36px; border-radius: 6px; margin: 48px 0;
+      border: 1px solid rgba(0,0,0,0.05);
     }
-    .pd-critique {
-      font-size: 0.95em;
-      line-height: 1.65;
-      color: rgba(0,0,0,0.6);
-      max-width: 580px;
-    }
-    .accce-row { max-width: 580px; }
+    .pd-justif-box h4 { font-size: 1em; font-weight: 800; margin-bottom: 12px; }
+    .pd-justif-box p { font-size: 0.95em; line-height: 1.6; color: rgba(0,0,0,0.7); }
 
+    /* Justif card éditoriale (rendu par défaut) */
+    .pd-justif-card {
+      position: relative;
+      background: #0a0a0a; color: #fff;
+      padding: 40px 40px 40px 44px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .pd-justif-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #fff, rgba(255,255,255,0.3));
+    }
+    .pd-justif-card-codes {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px;
+    }
+    .pd-justif-card-codes .code-pill {
+      font-size: 0.72em; font-weight: 700; letter-spacing: 1px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+    .pd-justif-card-label {
+      font-size: 0.72em; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 10px;
+    }
+    .pd-justif-card p {
+      font-size: 1.02em; line-height: 1.65;
+      color: rgba(255,255,255,0.88);
+    }
+
+    /* Code inline éditorial */
+    .pd-chapter-body code, .pd-text code {
+      font-family: 'SF Mono', ui-monospace, 'Menlo', 'Consolas', monospace;
+      font-size: 0.86em;
+      background: rgba(0,0,0,0.05);
+      padding: 2px 6px; border-radius: 4px;
+      color: #000;
+    }
+
+    /* ── Bloc dev : diagnostic (cartes d'obstacles) ── */
+    .pd-issues { display: grid; gap: 14px; margin-top: 28px; }
+    .pd-issue {
+      display: grid; grid-template-columns: 28px 1fr; gap: 18px;
+      align-items: start;
+      padding: 22px 26px;
+      background: #fafafa;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 10px;
+      transition: transform 0.25s cubic-bezier(0.22,1,0.36,1), box-shadow 0.25s ease;
+    }
+    .pd-issue:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.07); }
+    .pd-issue-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #000; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.74em; font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .pd-issue p { font-size: 0.97em; line-height: 1.6; color: rgba(0,0,0,0.72); }
+
+    /* ── Bloc dev : preuves de compétence ── */
+    .pd-proof-item { margin: 36px 0; }
+    .pd-proof-item:first-child { margin-top: 8px; }
+    .pd-proof-head {
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .pd-proof-head .code-chip {
+      font-size: 0.72em; font-weight: 700; letter-spacing: 0.8px;
+      padding: 5px 11px; border-radius: 5px;
+      background: #000; color: #fff;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .pd-proof-head-label {
+      font-size: 0.74em; font-weight: 600; letter-spacing: 1.2px;
+      text-transform: uppercase; color: rgba(0,0,0,0.45);
+      line-height: 1.4;
+    }
+    .pd-proof-item .pd-proof-frame { margin: 0; }
+    .pd-proof-item > p { font-size: 1em; line-height: 1.7; color: rgba(0,0,0,0.75); margin-top: 18px; }
+
+    /* Conteneur image entre le titre de chapitre et le texte */
+    .pd-chapter-media { margin: 0 0 26px; }
+
+    /* ── Diaporama en fondu enchaîné ── */
+    .pd-slideshow {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      cursor: zoom-in;
+      background: #0a0a0a;
+    }
+    .pd-slide {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+      pointer-events: none;
+    }
+    .pd-slide.is-active { opacity: 1; }
+    .pd-slideshow-dots {
+      position: absolute; left: 0; right: 0; bottom: 14px;
+      display: flex; justify-content: center; gap: 8px;
+      z-index: 2; pointer-events: none;
+    }
+    .pd-slideshow-dots span {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      transition: background 0.4s ease, transform 0.4s ease;
+    }
+    .pd-slideshow-dots span.is-active {
+      background: #fff; transform: scale(1.25);
+    }
+
+    /* ── Comparateur avant / après ── */
+    .pd-baslider {
+      position: relative;
+      overflow: hidden;
+      cursor: ew-resize;
+      user-select: none;
+      touch-action: none;
+      line-height: 0;
+    }
+    .pd-baslider img { display: block; pointer-events: none; }
+    .pd-baslider .ba-after { width: 100%; height: auto; }
+    .pd-baslider .ba-before {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      clip-path: inset(0 50% 0 0);
+    }
+    .pd-baslider .ba-divider {
+      position: absolute; top: 0; bottom: 0; left: 50%;
+      width: 2px; background: #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.18);
+      transform: translateX(-1px);
+      pointer-events: none;
+    }
+    .pd-baslider .ba-grip {
+      position: absolute; top: 50%; left: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+    }
+    .pd-baslider .ba-label {
+      position: absolute; top: 12px;
+      font-size: 0.64em; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #fff; background: rgba(0,0,0,0.55);
+      padding: 4px 9px; border-radius: 4px;
+      pointer-events: none; line-height: 1;
+    }
+    .pd-baslider .ba-label.before { left: 12px; }
+    .pd-baslider .ba-label.after { right: 12px; }
+
+    /* ── Lightbox (image agrandie) ── */
+    #lightbox {
+      position: fixed; inset: 0; z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 40px;
+      background: rgba(0,0,0,0.88);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      cursor: zoom-out;
+    }
+    #lightbox.open { opacity: 1; pointer-events: auto; }
+    #lightbox img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      border-radius: 6px;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+      transform: scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+    }
+    #lightbox.open img { transform: scale(1); }
+    #lightbox-close {
+      position: fixed; top: 24px; right: 28px;
+      width: 44px; height: 44px;
+      background: rgba(255,255,255,0.1); color: #fff;
+      border: 1px solid rgba(255,255,255,0.25); border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,0.2); transform: scale(1.08); }
+    #lightbox-close svg { width: 22px; height: 22px; }
+
+    /* Conteneur image à l'intérieur d'une carte d'obstacle */
+    .pd-issue-media { grid-column: 2; margin-top: 16px; }
+    .pd-issue-media .pd-proof-frame { box-shadow: none; }
+
+    /* Tags et Liens */
+    .pd-footer {
+      display: flex; flex-direction: column; gap: 24px;
+      margin-top: 64px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 40px;
+    }
     .pd-tags { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag {
-      font-size: 0.72em;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 6px 12px;
-      border: 1px solid rgba(0,0,0,0.15);
-      border-radius: 999px;
+      font-size: 0.72em; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+      padding: 8px 16px; border: 1px solid rgba(0,0,0,0.15); border-radius: 999px;
       color: rgba(0,0,0,0.6);
     }
-
-    .pd-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .pd-links { display: flex; flex-wrap: wrap; gap: 12px; }
     .link-btn {
-      font-size: 0.85em;
-      font-weight: 600;
-      letter-spacing: 0.4px;
-      padding: 11px 22px;
-      border-radius: 999px;
-      background: #000;
-      color: #fff;
-      text-decoration: none;
+      font-size: 0.85em; font-weight: 600; letter-spacing: 0.4px;
+      padding: 11px 22px; border-radius: 999px;
+      background: #000; color: #fff; text-decoration: none;
       transition: transform 0.2s ease, opacity 0.2s ease;
     }
     .link-btn:hover { transform: translateY(-2px); opacity: 0.85; }
     .link-btn.ghost { background: transparent; color: #000; border: 1.5px solid #000; }
 
-    @media (max-width: 860px) {
-      #project-detail { flex-direction: column; }
-      .pd-media { width: 100%; padding: 64px 24px 24px; }
-      .pd-content { padding: 32px 24px 48px; }
+    @media (max-width: 768px) {
+      .pd-container { padding: 80px 24px 60px; }
+      .pd-critique-grid { grid-template-columns: 1fr; gap: 32px; padding: 32px 0; }
+      .pd-title { font-size: 2.8em; }
     }
 
     /* ── Panneau de transition slide ── */
@@ -433,13 +655,11 @@
 
   <!-- Détail projet -->
   <div id="project-detail">
-    <button id="btn-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div class="pd-media">
-      <div class="pd-media-main"><img id="pd-main-img" src="" alt="" /></div>
-      <div class="pd-caption" id="pd-caption"></div>
-      <div class="pd-thumbs" id="pd-thumbs"></div>
-    </div>
-    <div class="pd-content" id="pd-content"></div>
+    <button id="btn-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Retour
+    </button>
+    <div class="pd-container" id="pd-container"></div>
   </div>
 
   <button id="to-conclusion">
@@ -449,6 +669,12 @@
 
   <div id="loading">
     <div class="loader"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- Lightbox image agrandie -->
+  <div id="lightbox">
+    <button id="lightbox-close" aria-label="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <img src="" alt="" draggable="false"/>
   </div>
 
   <div id="slide-panel"></div>
