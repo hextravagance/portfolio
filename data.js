@@ -31,7 +31,108 @@ export const SKILLS = [
       { code: 'CE1.04', label: 'En sollicitant des modèles théoriques issus des sciences humaines et sociales' },
       { code: 'CE1.05', label: 'En restituant les résultats de manière synthétique' }
     ],
-    projects: [],
+    projects: [
+      {
+        title: 'KULT',
+        context: 'Intra-muros',
+        year: '2025',
+        role: 'UX Researcher',
+        contentHtml: `
+<section class="pd-chapter">
+  <div class="pd-chapter-num">01</div>
+  <div class="pd-chapter-body">
+    <div class="pd-chapter-eyebrow">Point de départ</div>
+    <h3 class="pd-chapter-title">Reconnecter les jeunes à la culture locale</h3>
+    <p class="pd-lead">Dans le cadre du projet <strong>KULT</strong>, l'ambition était de reconnecter les jeunes à la culture locale, un domaine souvent perçu comme inaccessible malgré notre hyper-connexion. Avant même d'imaginer une solution ou une interface, mon premier défi a été de <strong>comprendre fondamentalement</strong> le rapport de cette cible à la culture afin de proposer un service ancré dans leurs habitudes réelles.</p>
+  </div>
+</section>
+
+<section class="pd-chapter">
+  <div class="pd-chapter-num">02</div>
+  <div class="pd-chapter-body">
+    <div class="pd-chapter-eyebrow">Ma démarche</div>
+    <h3 class="pd-chapter-title">Une investigation en trois temps</h3>
+    <p class="pd-text">Au lieu de fonder le projet sur des suppositions, j'ai mené une phase d'immersion et de recherche centrée utilisateur structurée en trois étapes :</p>
+    <div class="pd-issues">
+      <div class="pd-issue">
+        <div class="pd-issue-num">1</div>
+        <p><strong>Interroger :</strong> j'ai élaboré un protocole d'interviews avec des questions ouvertes, comme <em>"C'est quoi pour toi une culture accessible ?"</em> ou <em>"Comment trouves-tu l'offre culturelle dans ta ville ?"</em>.</p>
+      </div>
+      <div class="pd-issue">
+        <div class="pd-issue-num">2</div>
+        <p><strong>Synthétiser :</strong> à partir de ces entretiens, j'ai modélisé des <strong>Personas</strong> et une <strong>Carte d'empathie</strong> pour structurer les données qualitatives recueillies.</p>
+      </div>
+      <div class="pd-issue">
+        <div class="pd-issue-num">3</div>
+        <p><strong>Décoder :</strong> cette phase m'a permis d'extraire des <strong>Insights décisifs</strong>. La culture n'est pas qu'une consommation passive, c'est avant tout une <strong>expérience sociale</strong> (<em>"savoir quoi faire ce soir et avec qui"</em>).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pd-chapter">
+  <div class="pd-chapter-num">03</div>
+  <div class="pd-chapter-body">
+    <div class="pd-chapter-eyebrow">Trace</div>
+    <h3 class="pd-chapter-title">Preuves de compétences</h3>
+
+    <div class="pd-proof-item">
+      <div class="pd-proof-head">
+        <span class="code-chip">AC21.05</span>
+        <span class="pd-proof-head-label">Cartographier les expériences utilisateur : points de contact, points de friction et de satisfaction, carte d'empathie</span>
+      </div>
+      <div class="pd-proof-frame">
+        <img src="img/1/1.png" alt="Capture Personas / Carte d'empathie & Résumé des Insights" style="width:100%;height:auto;display:block;"/>
+      </div>
+      <p>La carte d'empathie issue de mes interviews m'a permis de <strong>cartographier précisément les frictions</strong> : les "barrières locales" et la "vision stéréotypée" de la culture empêchent les jeunes de s'y intéresser. À l'inverse, le levier de <strong>satisfaction</strong> identifié est la dimension sociale et le partage. C'est cette cartographie qui a orienté toute la phase d'idéation vers des concepts communautaires.</p>
+    </div>
+
+    <div class="pd-proof-item">
+      <div class="pd-proof-head">
+        <span class="code-chip">CE1.02</span>
+        <span class="pd-proof-head-label">En écoutant et observant les utilisateurs</span>
+      </div>
+      <div class="pd-proof-frame">
+        <img src="img/1/2.png" alt="Capture du protocole d'interview" style="width:100%;height:auto;display:block;"/>
+      </div>
+      <p>Je n'ai pas imposé ma propre vision du projet. J'ai systématiquement <strong>placé l'utilisateur final au centre</strong> de ma réflexion en allant l'interroger directement. Toutes les décisions stratégiques qui ont suivi, comme la proposition du concept d'IA conversationnelle <strong>CultureSync</strong>, découlent strictement de cette écoute active.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pd-chapter">
+  <div class="pd-chapter-num">04</div>
+  <div class="pd-chapter-body">
+    <div class="pd-chapter-eyebrow">Réflexion</div>
+    <h3 class="pd-chapter-title">Prise de recul</h3>
+    <div class="pd-critique-grid" style="margin:32px 0 0;">
+      <div class="pd-critique-col">
+        <h4>Points forts</h4>
+        <p>Ce projet m'a appris à mettre de côté mes a priori de concepteur pour écouter objectivement les besoins du public. L'identification claire du besoin social m'a permis de générer des idées très fortes et ciblées en phase d'idéation.</p>
+      </div>
+      <div class="pd-critique-col">
+        <h4>Points faibles</h4>
+        <p>Mon panel d'interviews manquait peut-être un peu de diversité. Si c'était à refaire, j'élargirais mon échantillon à des tranches d'âge différentes ou des milieux moins urbains pour m'assurer que mes Insights couvrent un public plus représentatif des véritables fractures culturelles.</p>
+      </div>
+    </div>
+    <div class="pd-critique-callout" style="margin-top:40px;">
+      <p>Ce projet a confirmé l'importance capitale de la phase de recherche utilisateur avant toute conception. En comprenant que la culture est avant tout une expérience sociale, j'ai pu orienter les concepts d'idéation (comme CultureSync) vers des solutions vraiment ancrées dans les besoins réels de la cible, plutôt que de proposer un énième agenda culturel.</p>
+    </div>
+  </div>
+</section>
+        `,
+        acs: [
+          { code: 'AC21.05', label: 'Cartographier les expériences utilisateur : points de contact, points de friction et de satisfaction, carte d\'empathie' },
+        ],
+        ces: [
+          { code: 'CE1.02', label: 'En écoutant et observant les utilisateurs' },
+        ],
+        tags: ['UX Research', 'Interviews', 'Personas', 'Carte d\'empathie', 'Insights'],
+        links: [],
+        image: 'img/1/main.png',
+        proofImage: '',
+      },
+    ],
   },
 
   {
@@ -268,9 +369,9 @@ export const SKILLS = [
         <img src="img/3/AC23.06.png" alt="Scène rotoscopée du générique" style="width:100%; height:auto; display:block;"/>
       </div>
       <div class="pd-proof-frame" style="margin-top:16px;">
-        <div class="pd-baslider" data-baslider role="group" aria-label="Comparateur avant / après — glisser pour révéler" tabindex="0">
-          <img class="ba-after" src="img/3/AC23.06_2.png" alt="Après — rendu final en aplat noir" draggable="false"/>
-          <img class="ba-before" src="img/3/AC23.06_1.png" alt="Avant — maillage de tracking Mocha Pro" draggable="false"/>
+        <div class="pd-baslider" data-baslider role="group" aria-label="Comparateur avant / après (glisser pour révéler)" tabindex="0">
+          <img class="ba-after" src="img/3/AC23.06_2.png" alt="Après : rendu final en aplat noir" draggable="false"/>
+          <img class="ba-before" src="img/3/AC23.06_1.png" alt="Avant : maillage de tracking Mocha Pro" draggable="false"/>
           <div class="ba-divider"></div>
           <div class="ba-grip" aria-hidden="true">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 7 6 12 11 17"/><polyline points="13 7 18 12 13 17"/></svg>
@@ -399,12 +500,12 @@ export const SKILLS = [
     <div class="pd-chapter-eyebrow">Nouvelle itération</div>
     <h3 class="pd-chapter-title">Et maintenant ?</h3>
     <div class="pd-chapter-media">
-      <div class="pd-proof-frame pd-slideshow" data-slideshow data-interval="3000" role="button" tabindex="0" aria-label="Diaporama Dragon’s Curse — cliquer pour agrandir">
-        <img class="pd-slide is-active" src="img/4/1.png" alt="Dragon’s Curse Tower Escape — capture 1" draggable="false"/>
-        <img class="pd-slide" src="img/4/2.png" alt="Dragon’s Curse Tower Escape — capture 2" draggable="false"/>
-        <img class="pd-slide" src="img/4/3.png" alt="Dragon’s Curse Tower Escape — capture 3" draggable="false"/>
-        <img class="pd-slide" src="img/4/4.png" alt="Dragon’s Curse Tower Escape — capture 4" draggable="false"/>
-        <img class="pd-slide" src="img/4/5.png" alt="Dragon’s Curse Tower Escape — capture 5" draggable="false"/>
+      <div class="pd-proof-frame pd-slideshow" data-slideshow data-interval="3000" role="button" tabindex="0" aria-label="Diaporama Dragon’s Curse (cliquer pour agrandir)">
+        <img class="pd-slide is-active" src="img/4/1.png" alt="Dragon’s Curse Tower Escape : capture 1" draggable="false"/>
+        <img class="pd-slide" src="img/4/2.png" alt="Dragon’s Curse Tower Escape : capture 2" draggable="false"/>
+        <img class="pd-slide" src="img/4/3.png" alt="Dragon’s Curse Tower Escape : capture 3" draggable="false"/>
+        <img class="pd-slide" src="img/4/4.png" alt="Dragon’s Curse Tower Escape : capture 4" draggable="false"/>
+        <img class="pd-slide" src="img/4/5.png" alt="Dragon’s Curse Tower Escape : capture 5" draggable="false"/>
         <div class="pd-slideshow-dots" aria-hidden="true">
           <span class="is-active"></span><span></span><span></span><span></span><span></span>
         </div>
@@ -566,7 +667,7 @@ export const SKILLS = [
       <div class="pd-proof-frame">
         <img src="img/5/AC25.01.png" alt="Burndown chart du sprint" style="width:100%;height:auto;display:block;"/>
       </div>
-      <p>J'ai piloté le projet entièrement en Scrum — sprints, backlog, Jira, burndown chart — la méthode agile d'amélioration continue par excellence. Les tickets SCRUM-18 et SCRUM-19 validés en « Done » en témoignent.</p>
+      <p>J'ai piloté le projet entièrement en Scrum (sprints, backlog, Jira, burndown chart), la méthode agile d'amélioration continue par excellence. Les tickets SCRUM-18 et SCRUM-19 validés en « Done » en témoignent.</p>
     </div>
 
     <div class="pd-proof-item">
