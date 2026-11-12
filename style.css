@@ -955,7 +955,8 @@ body.light-theme .skill-icon img.is-white {
     /* iOS Safari : 100vh varie avec la barre d'adresse. On prend le plus grand viewport (lvh)
        pour que "01. STATUS" ne dépasse jamais en bas du hero */
     #bg { height: 100lvh; }
-    main { margin-top: 100lvh; }
+    /* + marge de sécurité : sur iOS récent la page passe sous la barre flottante, la hauteur visible dépasse parfois 100lvh */
+    main { margin-top: calc(100lvh + 140px); }
 
     /* Retirer les popups */
     .info,
