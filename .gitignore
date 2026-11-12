@@ -1,0 +1,19 @@
+# --- Sauvegardes manuelles du projet ---
+backup-*/
+
+# --- Config éditeur / outils (inutile sur GitHub) ---
+.claude/
+.vscode/
+
+# --- Polices non utilisées par le site ---
+# (EVA Matisse n'est plus référencée ; MDThermochrome est une version "Trial" ; les .eot ne sont pas chargés)
+EVA-Matisse_Standard.ttf
+fonts/EVA-Matisse_Standard.*
+fonts/MDThermochrome*
+fonts/*.eot
+fonts/*.[pP][dD][fF]
+
+# --- Fichiers système ---
+.DS_Store
+Thumbs.db
+desktop.ini

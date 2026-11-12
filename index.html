@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P+FLI+</title>
+    <link rel="icon" id="favicon" type="image/svg+xml" href="img/favicon-light.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="satoshi.css">
+    <link rel="stylesheet" href="project.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrambleTextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+</head>
+
+<body>
+
+    <div id="custom-cursor"></div>
+    <div id="page-fade"></div>
+    <div id="project-preview" class="no-img" aria-hidden="true"><img alt=""><video muted loop playsinline
+            preload="auto"></video></div>
+    <div id="bg"></div>
+
+    <script src="ascii-effect.js"></script>
+
+    <img id="logo" src="img/ico.svg" alt="Logo">
+
+    <nav id="main-menu">
+        <a href="#presentation"></a>
+        <a href="#projets"></a>
+        <a href="photos.html"></a>
+        <a href="#contacts"></a>
+    </nav>
+
+    <div id="cta">Mes projets ↓</div>
+
+    <div class="info i1">
+        <div class="dot"></div>
+        <div class="text"></div>
+    </div>
+
+    <div class="info i2">
+        <div class="dot"></div>
+        <div class="text"></div>
+    </div>
+
+    <div class="info i3">
+        <div class="dot"></div>
+        <div class="text"></div>
+    </div>
+
+    <main id="content-scroller">
+
+        <section id="presentation" class="panel">
+            <div class="header-section">
+                <h2 class="glitch-text" data-text="01. STATUS">01. STATUS</h2>
+                <div class="line"></div>
+            </div>
+            <pre id="status-ascii" aria-hidden="true"></pre>
+            <div class="bio-grid">
+                <div class="bio-text">
+                    <p>Moi c'est Nicolas, j'ai 20 ans, je suis un jeune développeur originaire du sud de la France, et
+                        j'étudie en BUT MMI (Métiers du Multimédia et de l'Internet).</p>
+                    <p>J'ai toujours été attiré à la fois par le développement et par le design : j'aime autant écrire
+                        le code d'une interface que penser son image, son rythme et ses animations.</p>
+                    <p>Je cherche à rester polyvalent sur tous les aspects de la création, que ce soit pour des visuels,
+                        de la vidéo, de la 3D ou des pages web, et à relier ces mondes dans des projets qui ont une
+                        vraie identité.</p>
+                </div>
+                <div id="skills" class="skills">
+                </div>
+            </div>
+        </section>
+
+        <section id="projets" class="panel">
+            <div class="header-section">
+                <h2 class="glitch-text" data-text="02. ARCHIVES">02. ARCHIVES</h2>
+                <div class="line"></div>
+            </div>
+
+            <div class="project-list">
+                <article class="project-item" data-preview="img/preview/01.mp4" data-gif="img/brb.gif">
+                    <div class="p-num">PRJ-01</div>
+                    <div class="p-info">
+                        <h3>ATOMAP</h3>
+                        <p>Carte collaborative pour recenser les stickers de rue</p>
+                        <p>React • Leaflet • PocketBase</p>
+                    </div>
+                    <div class="p-img-placeholder"></div> <a href="#" class="p-link">ACCÈS →</a>
+                </article>
+
+                <article class="project-item" data-preview="img/projects/prj-02.jpg" data-gif="img/brb.gif">
+                    <div class="p-num">PRJ-02</div>
+                    <div class="p-info">
+                        <h3>BLOONS VR</h3>
+                        <p>Tower defense en réalité virtuelle</p>
+                        <p>Blender • Unity • C# • Meta Quest</p>
+                    </div>
+                    <div class="p-img-placeholder"></div>
+                    <a href="#" class="p-link">ACCÈS →</a>
+                </article>
+
+                <article class="project-item" data-preview="img/projects/prj-03.jpg" data-gif="img/brb.gif">
+                    <div class="p-num">PRJ-03</div>
+                    <div class="p-info">
+                        <h3>FVT</h3>
+                        <p>Lecteur de musique web pour ma bibliothèque perso</p>
+                        <p>JavaScript • Three.js • Node.js • Express</p>
+                    </div>
+                    <div class="p-img-placeholder"></div>
+                    <a href="#" class="p-link">ACCÈS →</a>
+                </article>
+
+                <article class="project-item" data-preview="img/projects/prj-04.jpg" data-gif="img/brb.gif">
+                    <div class="p-num">PRJ-04</div>
+                    <div class="p-info">
+                        <h3>SAE - NIRYO</h3>
+                        <p>Visualiseur 3D et AR du robot Ned2 avec assistant IA</p>
+                        <p>Three.js • WebXR • Node.js • MySQL</p>
+                    </div>
+                    <div class="p-img-placeholder"></div>
+                    <a href="#" class="p-link">ACCÈS →</a>
+                </article>
+
+                <article class="project-item" data-preview="img/projects/prj-05.jpg" data-gif="img/brb.gif">
+                    <div class="p-num">PRJ-05</div>
+                    <div class="p-info">
+                        <h3>VILLA NORIA</h3>
+                        <p>Refonte d'un site WordPress de domaine viticole</p>
+                        <p>HTML • CSS • JavaScript • WordPress</p>
+                    </div>
+                    <div class="p-img-placeholder"></div>
+                    <a href="https://web-mmi2.iutbeziers.fr/~nicolas.rapuzzi/Villa%20Noria/" target="_blank"
+                        rel="noopener" class="p-link">ACCÈS →</a>
+                </article>
+            </div>
+        </section>
+
+        <section id="contacts" class="panel footer-panel">
+            <div class="huge-text">LET'S TALK</div>
+            <a href="mailto:nicolas.dev@gmail.com" class="email-link">NICOLAS.DEV@GMAIL.COM</a>
+            <div class="footer-meta">
+                <span>© 2026 SYSTEM ONLINE</span>
+                <span>END OF LINE_</span>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="i18n.js"></script>
+    <script src="ascii-status.js"></script>
+    <script src="skills.js"></script>
+    <script src="script.js"></script>
+    <script src="project.js"></script>
+
+</body>
+
+</html>

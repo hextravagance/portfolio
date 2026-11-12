@@ -1,0 +1,222 @@
+﻿/* ============================================================
+   PAGE PROJET + PHOTOS (lightbox)
+   ============================================================ */
+html.project-locked,
+html.project-locked body { overflow: hidden; }
+
+body.project-open #project-preview { display: none; }
+
+/* le curseur reste visible sur le fond noir, même en thème clair */
+body.project-open #custom-cursor,
+body.project-open.light-theme #custom-cursor {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+body.project-open #custom-cursor.hover-link,
+body.project-open.light-theme #custom-cursor.hover-link {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: #fff;
+}
+
+#project-curtain {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 9000;
+    pointer-events: none;
+    will-change: transform;
+}
+
+#project-page,
+#photo-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9001;
+    background: #000;
+    color: #fff;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    visibility: hidden;
+}
+
+#project-page *,
+#photo-lightbox * { color: inherit; }
+
+.pp-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-family: "Offbit", monospace;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #fff;
+    text-decoration: none;
+    transition: opacity .25s ease;
+}
+.pp-btn:hover { opacity: .6; }
+
+.pp-close,
+.lb-close {
+    position: fixed;
+    top: 28px;
+    right: 30px;
+    z-index: 3;
+}
+
+.pp-content {
+    padding: 120px 30px 180px;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.pp-num {
+    font-family: "Offbit", monospace;
+    color: #777;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.pp-title {
+    font-family: "Satoshi-Variable", sans-serif;
+    font-size: clamp(3.5rem, 11vw, 10rem);
+    line-height: .95;
+    margin: 0;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.pp-tagline {
+    font-size: 32px;
+    margin: 24px 0 0;
+    max-width: 780px;
+    opacity: .85;
+}
+
+.pp-hero {
+    margin: 60px 0;
+    aspect-ratio: 16 / 9;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.pp-hero img,
+.pp-hero video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.pp-body {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 2fr;
+    gap: 60px;
+    align-items: start;
+}
+.pp-meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, .3);
+    font-size: 18px;
+}
+.pp-meta-row span:first-child { color: #777; letter-spacing: 2px; font-size: 18px; }
+.pp-visit { display: inline-block; margin-top: 28px; font-size: 36px; }
+.pp-desc { font-size: 32px; line-height: 1.6; max-width: 760px; }
+
+.pp-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 80px;
+}
+/* page épurée : description seule + gif */
+.pp-body--solo { grid-template-columns: 1fr; }
+.pp-gif { margin-top: 80px; }
+.pp-body--solo .pp-desc { margin: 0 auto; text-align: center; }
+.pp-gif img { display: block; width: min(100%, 800px); height: auto; margin: 0 auto; border-radius: 6px; }
+.pp-shot { aspect-ratio: 4 / 3; background: #111; border: 1px solid #222; border-radius: 6px; }
+
+.pp-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 30px;
+    background: linear-gradient(0deg, #000 40%, transparent);
+    font-size: 18px;
+}
+.pp-count,
+.lb-count { font-family: "Offbit", monospace; color: #777; letter-spacing: 3px; }
+
+@media (max-width: 800px) {
+    .pp-body { grid-template-columns: 1fr; gap: 30px; }
+    .pp-gallery { grid-template-columns: 1fr; }
+}
+
+
+/* --- Transition de page (index <-> photos) --- */
+#page-fade {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 100000;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* le fondu de page suit le thème */
+body.light-theme #page-fade { background: #fff; }
+
+/* --- invite "terminal" pour la langue (Maj droite, hero de l'index) --- */
+#lang-term {
+    position: fixed;
+    top: 20px;
+    right: 10px;
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Offbit", monospace;
+    font-size: 18px; /* Offbit : net à 18px */
+    letter-spacing: 1px;
+    color: #fff;
+    visibility: hidden;
+    pointer-events: none;
+}
+#lang-term.is-open { pointer-events: auto; }
+#lang-term .lt-prompt { opacity: .9; animation: ltPulse 1.4s ease-in-out infinite; }
+#lang-input {
+    width: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    outline: none;
+    caret-color: currentColor;
+    caret-shape: block;
+}
+@keyframes ltPulse { 50% { opacity: .35; } }
+body.light-theme #lang-term { color: #000; }
+
+/* ============================================================
+   PAGE PROJET en thème clair : rideau, page, curseur et zones en blanc / texte noir
+   ============================================================ */
+body.light-theme #project-curtain { background: #fff; }
+body.light-theme #project-page { background: #fff; color: #000; }
+body.light-theme .pp-hero,
+body.light-theme .pp-shot { background: #eee; border-color: #ddd; }
+body.light-theme .pp-meta-row { border-bottom-color: rgba(0, 0, 0, .3); }
+body.light-theme .pp-nav { background: linear-gradient(0deg, #fff 40%, transparent); }
+body.light-theme .pp-count { color: #666; }
+body.project-open.light-theme #custom-cursor {
+    background: rgba(0, 0, 0, 0.18);
+    border-color: rgba(0, 0, 0, 0.85);
+}
+body.project-open.light-theme #custom-cursor.hover-link {
+    background: rgba(0, 0, 0, 0.28);
+    border-color: #000;
+}

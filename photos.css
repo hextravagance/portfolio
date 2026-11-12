@@ -1,0 +1,208 @@
+﻿/* ============================================================
+   PAGE PHOTOS — bento scrubbé + stagger au scroll
+   ============================================================ */
+html { background: #000; }
+body.photos-page { background: #000; color: #fff; overflow-x: hidden; }
+
+/* thème clair (choisi sur l'index) */
+html.light-theme-html { background: #fff; }
+body.photos-page.light-theme { background: #fff; color: #000; }
+body.photos-page.light-theme .gallery__item,
+body.photos-page.light-theme .flip-face,
+body.photos-page.light-theme .ph-frame { background: #e6e6e6; }
+/* header en mix-blend difference : texte blanc => il s'inverse selon le fond (noir sur blanc, clair sur photo sombre) */
+body.photos-page .ph-header,
+body.photos-page.light-theme .ph-header,
+body.photos-page.light-theme .ph-header .ph-link { color: #fff; }
+/* lien du bas (hors header, sans fusion) : noir sur fond blanc */
+body.photos-page.light-theme .ph-back { color: #000; }
+body.photos-page * { box-sizing: border-box; }
+
+.ph-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 30px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    mix-blend-mode: difference;
+    pointer-events: none;
+}
+.ph-header > * { pointer-events: auto; }
+.ph-link { color: #fff; text-decoration: none; transition: opacity .25s ease; }
+.ph-link:hover { opacity: .6; }
+.ph-count { min-width: 80px; text-align: right; }
+
+/* --- BENTO (démo "Scrubbed bento gallery") --- */
+.gallery-wrap {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.gallery { position: relative; width: 100%; height: 100%; flex: none; }
+
+.gallery__item {
+    position: relative;
+    flex: none;
+    overflow: hidden;
+    background: #111;
+}
+.gallery__item img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+}
+
+/* tuiles qui se retournent en 3D (axe horizontal, comme un réveil à palettes) */
+.gallery__item.is-flip { overflow: visible; background: none; perspective: 1400px; }
+.flip-inner { position: absolute; inset: 0; transform-style: preserve-3d; }
+.flip-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: #111;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+.flip-back { transform: rotateX(180deg); }
+
+.gallery--bento {
+    display: grid;
+    gap: 1vh;
+    grid-template-columns: repeat(3, 32.5vw);
+    grid-template-rows: repeat(4, 23vh);
+    justify-content: center;
+    align-content: center;
+}
+.gallery--final.gallery--bento {
+    grid-template-columns: repeat(3, 100vw);
+    grid-template-rows: repeat(4, 49.5vh);
+    gap: 1vh;
+}
+.gallery--bento .gallery__item:nth-child(1) { grid-area: 1/1/3/2; }
+.gallery--bento .gallery__item:nth-child(2) { grid-area: 1/2/2/3; }
+.gallery--bento .gallery__item:nth-child(3) { grid-area: 2/2/4/3; }
+.gallery--bento .gallery__item:nth-child(4) { grid-area: 1/3/3/3; }
+.gallery--bento .gallery__item:nth-child(5) { grid-area: 3/1/3/2; }
+.gallery--bento .gallery__item:nth-child(6) { grid-area: 3/3/5/4; }
+.gallery--bento .gallery__item:nth-child(7) { grid-area: 4/1/5/2; }
+.gallery--bento .gallery__item:nth-child(8) { grid-area: 4/2/5/3; }
+
+.ph-title {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-family: "Satoshi-Variable", sans-serif;
+    font-weight: 800;
+    font-size: clamp(5rem, 18vw, 20rem);
+    letter-spacing: -0.02em;
+    mix-blend-mode: difference;
+    color: #fff;
+    z-index: 5;
+    pointer-events: none;
+}
+.ph-hint {
+    position: absolute;
+    left: 50%; bottom: 28px;
+    transform: translateX(-50%);
+    z-index: 5;
+    letter-spacing: 3px;
+    font-size: 18px;
+    mix-blend-mode: difference;
+    animation: phHint 2s ease-in-out infinite;
+}
+@keyframes phHint { 50% { transform: translate(-50%, -6px); } }
+
+/* tuile "placeholder" tant que la photo n'existe pas */
+.ph-tile-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 14px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, .55);
+    background:
+        radial-gradient(120% 90% at 20% 10%, hsl(var(--h) 22% 38%), transparent 65%),
+        linear-gradient(160deg, hsl(var(--h) 16% 22%), #121212);
+}
+
+/* --- STAGGER (démo "Stagger items in on scroll") --- */
+.ph-rest { padding: 120px 0 100px; }
+.ph-rest .header-section { padding: 0 30px; }
+
+/* mosaïque : tuiles de tailles variées qui s'emboîtent, séparées par le même mince filet que le bento */
+.ph-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 6vw; /* ajusté en JS : 1/4 de la largeur d'une colonne */
+    grid-auto-flow: dense;
+    gap: 1vh;
+    padding: 0 1vh;
+    margin-bottom: 120px;
+}
+.ph-item { position: relative; margin: 0; opacity: 0; will-change: transform; overflow: hidden; }
+/* La forme de chaque tuile (colonnes/lignes occupées) est calculée en JS d'après le ratio réel de la photo */
+.ph-frame {
+    position: absolute;
+    inset: 0;
+    background: #111;
+}
+.ph-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    filter: grayscale(1);
+    transition: filter .5s ease, transform .8s cubic-bezier(.2, .7, .2, 1);
+}
+.ph-item:hover .ph-frame img { filter: none; transform: scale(1.05); }
+/* légende en surimpression, visible au survol */
+.ph-item figcaption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    padding: 14px;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #fff;
+    background: linear-gradient(0deg, rgba(0, 0, 0, .6), transparent);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+}
+.ph-item:hover figcaption { opacity: 1; }
+.ph-back { display: block; text-align: center; font-size: 36px; }
+
+@media (max-width: 800px) {
+    .gallery--bento { grid-template-columns: repeat(3, 32.5vw); }
+    .ph-rest { padding: 80px 0; }
+    .ph-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* thème clair : header lisible sur toutes les photos (noir sur pastille blanche, sans mode "difference") */
+body.photos-page.light-theme .ph-header { mix-blend-mode: normal; }
+body.photos-page.light-theme .ph-header .ph-link,
+body.photos-page.light-theme .ph-header .ph-count {
+    color: #000;
+    background: rgba(255, 255, 255, .85);
+    padding: 6px 12px;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}

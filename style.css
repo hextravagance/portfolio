@@ -1,0 +1,927 @@
+@font-face {
+    font-family: "Offbit";
+    src: url("fonts/OffBit-Dot.ttf") format("truetype");
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "Satoshi-Variable";
+    src: url("fonts/Satoshi-Variable.woff2") format("woff2"),
+        url("fonts/Satoshi-Variable.woff") format("woff"),
+        url("fonts/Satoshi-Variable.ttf") format("truetype");
+    font-weight: 300 900;
+    font-display: swap;
+    font-style: normal;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Offbit", monospace;
+    font-size: 18px;
+    /* Offbit = police pixel : nette à 18 / 32-36 / 54px */
+    color: #fff;
+    background: transparent;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: none;
+    transition: background-color 0.5s ease, color 0.5s ease
+}
+
+*,
+*::before,
+*::after {
+    cursor: none !important;
+}
+
+/* Custom cursor */
+#custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1.5px solid rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+        height 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+        background 0.3s ease,
+        border-color 0.3s ease,
+        opacity 0.3s ease;
+    will-change: left, top, transform;
+    backdrop-filter: blur(1px);
+}
+
+#custom-cursor.hover-link {
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Curseur sur l'ASCII art : plus fin et effet invert */
+#custom-cursor.hover-ascii {
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-color: #fff;
+    mix-blend-mode: difference;
+    backdrop-filter: none;
+}
+
+/* Curseur en thème clair (plus contrasté) */
+body.light-theme #custom-cursor {
+    background: rgba(0, 0, 0, 0.18);
+    border-color: rgba(0, 0, 0, 0.85);
+    border-width: 2px;
+}
+
+/* --- PREVIEW PROJET (suit le curseur) --- */
+#project-preview {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 520px;
+    aspect-ratio: 16 / 10;
+    z-index: 99998;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #111;
+    /* lueur diffuse (thème sombre) */
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.22), 0 0 120px rgba(255, 255, 255, 0.12);
+    opacity: 0;
+    scale: 0.92;
+    transition: opacity 0.25s ease, scale 0.25s ease;
+}
+
+#project-preview.is-visible {
+    opacity: 1;
+    scale: 1;
+}
+
+#project-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+#project-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+/* Idle : le container "respire" / wobble sur lui-même quand le curseur ne bouge pas.
+   Utilise les propriétés individuelles rotate/translate pour se cumuler avec
+   le suivi (x, y, rotation) géré par GSAP. */
+#project-preview.is-visible {
+    animation: ppWobble 3.2s ease-in-out infinite;
+}
+
+@keyframes ppWobble {
+    0% {
+        rotate: 0deg;
+        translate: 0 0;
+    }
+
+    20% {
+        rotate: 1.8deg;
+        translate: 3px -5px;
+    }
+
+    45% {
+        rotate: -1.4deg;
+        translate: -4px 3px;
+    }
+
+    70% {
+        rotate: 1.2deg;
+        translate: 2px 5px;
+    }
+
+    100% {
+        rotate: 0deg;
+        translate: 0 0;
+    }
+}
+
+/* thème clair : ombre portée douce à la place de la lueur + fond clair */
+body.light-theme #project-preview {
+    background: #f0f0f0;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme #custom-cursor.hover-ascii {
+    background: #fff;
+    border-color: #fff;
+    mix-blend-mode: difference;
+}
+
+/* Inversion du canvas ASCII en thème clair */
+body.light-theme #status-canvas {
+    filter: invert(1);
+}
+
+body.light-theme #custom-cursor.hover-link {
+    background: rgba(0, 0, 0, 0.28);
+    border-color: #000;
+}
+
+/* Transition globale pour le changement de thème */
+body *,
+body *::before,
+body *::after {
+    transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease, filter 0.5s ease
+}
+
+#project-preview {
+    transition: opacity 0.25s ease, scale 0.25s ease, background-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Thème clair */
+body.light-theme {
+    background: transparent;
+    color: #000
+}
+
+html.light-theme-html {
+    background-color: #fff;
+}
+
+/* Logo - invert(1) par défaut (blanc sur fond noir) */
+#logo {
+    filter: invert(1);
+    transition: filter 0.3s ease
+}
+
+/* Logo en thème clair - invert(0) pour être noir */
+body.light-theme #logo {
+    filter: invert(0)
+}
+
+/* Info dot en noir */
+body.light-theme .info .dot {
+    background-color: #000
+}
+
+/* Main menu en noir */
+body.light-theme #main-menu a {
+    color: #000
+}
+
+/* Header section - ligne en noir */
+body.light-theme .header-section .line {
+    background: linear-gradient(90deg, #000, transparent)
+}
+
+body.light-theme .header-section h2 {
+    color: #000
+}
+
+/* Glitch text en noir */
+body.light-theme .glitch-text {
+    color: #000
+}
+
+body.light-theme .glitch-text::before,
+body.light-theme .glitch-text::after {
+    color: #000
+}
+
+/* Panel / Section presentation */
+body.light-theme .panel {
+    background: #fff
+}
+
+body.light-theme .bio-text p {
+    color: #000
+}
+
+body.light-theme .bio-text .highlight {
+    color: #333
+}
+
+body.light-theme .stats-box {
+    border-color: #000;
+    background: rgba(0, 0, 0, 0.05)
+}
+
+body.light-theme .stat-row {
+    color: #000;
+    border-color: rgba(0, 0, 0, 0.2)
+}
+
+/* Popups flottants */
+body.light-theme .floating-popup,
+body.light-theme .i1,
+body.light-theme .i2,
+body.light-theme .i3 {
+    color: #000
+}
+
+body.light-theme .info .text a {
+    color: #000
+}
+
+/* Liens */
+body.light-theme a {
+    color: #333
+}
+
+body.light-theme a:hover {
+    color: #000
+}
+
+/* Transition pour masquer les info au scroll */
+.info {
+    transition: opacity 0.4s ease
+}
+
+/* Animation rotation logo */
+#logo {
+    cursor: pointer;
+    transition: transform 0.6s ease
+}
+
+#logo.rotating {
+    animation: logoRotate 0.6s ease forwards
+}
+
+@keyframes logoRotate {
+    0% {
+        transform: rotateY(0deg)
+    }
+
+    100% {
+        transform: rotateY(360deg)
+    }
+}
+
+#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none
+}
+
+#logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 60px;
+    z-index: 5;
+    height: auto;
+    filter: invert()
+}
+
+#main-menu {
+    position: absolute;
+    left: 30px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: 36px;
+    letter-spacing: 2px;
+    z-index: 5
+}
+
+#main-menu a {
+    color: #fff;
+    text-decoration: none;
+    line-height: 1.2;
+    overflow: hidden;
+    display: block;
+    position: relative;
+    min-height: 1.2em
+}
+
+#main-menu a .default,
+#main-menu a .hover {
+    display: block;
+    white-space: nowrap
+}
+
+#main-menu a .default span {
+    translate: 0 -1.8em
+}
+
+#main-menu a .hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%
+}
+
+#main-menu a .hover span {
+    translate: 0 1.8em
+}
+
+#main-menu a span {
+    position: relative;
+    display: inline-block
+}
+
+#main-menu a:not(:hover) .default span {
+    animation: slideToVisible .25s forwards;
+    animation-delay: calc(var(--index)*.05s)
+}
+
+#main-menu a:hover .default span {
+    animation: slideUp .25s forwards;
+    animation-delay: calc(var(--index)*.05s)
+}
+
+#main-menu a:not(:hover) .hover span {
+    animation: slideDownAlt .25s forwards;
+    animation-delay: calc(var(--index)*.05s)
+}
+
+#main-menu a:hover .hover span {
+    animation: slideUpAlt .25s forwards;
+    animation-delay: calc(var(--index)*.05s)
+}
+
+@keyframes slideToVisible {
+    0% {
+        translate: 0 -1.8em
+    }
+
+    100% {
+        translate: 0 0
+    }
+}
+
+@keyframes slideUp {
+    100% {
+        translate: 0 -1.8em
+    }
+}
+
+@keyframes slideUpAlt {
+    0% {
+        translate: 0 1.8em
+    }
+
+    100% {
+        translate: 0 0
+    }
+}
+
+@keyframes slideDownAlt {
+    0% {
+        translate: 0 0
+    }
+
+    100% {
+        translate: 0 1.8em
+    }
+}
+
+@keyframes glow {
+
+    0%,
+    100% {
+        text-shadow: 0 0 2px currentColor, 0 0 6px currentColor, 0 0 12px currentColor;
+        opacity: 1
+    }
+
+    50% {
+        text-shadow: 0 0 1px currentColor, 0 0 3px currentColor, 0 0 6px currentColor;
+        opacity: .9
+    }
+}
+
+#cta {
+    position: absolute;
+    right: 30px;
+    bottom: 30px;
+    font-size: 28px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform .3s ease-out;
+    z-index: 5
+}
+
+#cta:hover {
+    animation: float 2s ease-in-out infinite
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0)
+    }
+
+    50% {
+        transform: translateY(-5px)
+    }
+}
+
+.debug-zone {
+    position: absolute;
+    border: 2px dashed rgba(255, 0, 0, .3);
+    background: rgba(255, 0, 0, .05);
+    pointer-events: none;
+    z-index: 9999;
+    color: red;
+    font-size: 12px;
+    font-family: monospace
+}
+
+.info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 32px;
+    letter-spacing: 1px;
+    line-height: 1.25;
+    opacity: 0;
+    transition: opacity .8s ease-in-out;
+    will-change: transform, opacity;
+    pointer-events: auto;
+    width: max-content;
+    max-width: 480px;
+    z-index: 10
+}
+
+.info.hidden {
+    opacity: 0;
+    pointer-events: none
+}
+
+.info .dot {
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    display: inline-block;
+    flex-shrink: 0;
+    margin-top: 9px
+}
+
+.info .text {
+    transition: opacity .5s ease-in-out
+}
+
+.info .text a {
+    text-decoration: none;
+    color: #fff
+}
+
+/* Réduire l'opacité des infos quand on hover le logo ASCII */
+body.ascii-hovered .info {
+    opacity: 0.15 !important;
+    transition: opacity 0.4s ease;
+}
+
+.info.i1 {
+    top: 250px;
+    left: 150px
+}
+
+.info.i2 {
+    top: 200px;
+    right: 70px
+}
+
+.info.i3 {
+    bottom: 100px;
+    right: 280px
+}
+
+/* --- MODIFICATION GLOBALE --- */
+html {
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #000;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+body {
+    overflow: visible;
+    height: auto;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+/* Le fond Unicorn Studio reste fixe derrière */
+#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- STRUCTURE SCROLLER --- */
+main {
+    position: relative;
+    z-index: 10;
+    margin-top: 100vh;
+    /* Le contenu commence APRÈS l'écran d'accueil */
+    background: transparent;
+    /* On laisse voir le fond au début si on veut */
+}
+
+/* Chaque section prend au moins tout l'écran */
+section.panel {
+    min-height: 100vh;
+    padding: 40px 30px;
+    box-sizing: border-box;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- TYPOGRAPHIE & HEADERS --- */
+.header-section {
+    display: flex;
+    align-items: baseline;
+    margin-bottom: 24px;
+}
+
+h2 {
+    font-family: "Satoshi-Variable", sans-serif;
+    /* Ta font stylée */
+    font-size: 4rem;
+    margin: 0;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.line {
+    flex-grow: 1;
+    height: 2px;
+    background: #fff;
+    margin-left: 20px;
+}
+
+/* --- STATUS : ASCII ART centre-gauche --- */
+#presentation {
+    position: relative;
+}
+
+#status-ascii {
+    position: absolute;
+    left: 30px;
+    top: 50%;
+    transform-origin: left top;
+    margin: 0;
+    /* Vraie monospace à taille normale; l'échelle est appliquée en JS (ascii-status.js) */
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 10px;
+    line-height: 10px;
+    letter-spacing: 0;
+    font-kerning: none;
+    font-variant-ligatures: none;
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+    white-space: pre;
+    color: #fff;
+    opacity: 0.85;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+}
+
+#status-canvas {
+    position: absolute;
+    left: -55px;
+    top: 55%;
+    transform: translateY(-50%) scaleX(-1);
+    /* miroir horizontal */
+    opacity: 0.85;
+    pointer-events: none;
+    z-index: 0;
+}
+
+#presentation .header-section,
+#presentation .bio-grid {
+    position: relative;
+    z-index: 1;
+}
+
+/* --- SECTION BIO (STATS) --- */
+.bio-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+    /* la partie gauche est occupée par l'ASCII */
+    width: 58%;
+    margin: auto 0 auto auto;
+    /* centré verticalement dans la place restante, donc à hauteur de l'ASCII */
+    top: 2.7vh; /* compense le margin-top des skills pour que la bio reste alignée en haut de l'ASCII */
+    font-family: "Offbit", monospace;
+    font-size: 1.2rem;
+}
+
+.highlight {
+    font-family: "MDThermochrome", sans-serif;
+    /* Ta font italique */
+    color: #aaa;
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+.stats-box {
+    border: 1px solid #fff;
+    padding: 20px;
+}
+
+
+.bio-text p {
+    font-family: "Offbit", monospace;
+    /* Offbit est une police pixel : nette à 18/36/54px ; 32px est la taille la plus proche de la grille dans la zone 28-32 */
+    font-size: 32px;
+    line-height: 1.5;
+    margin: 0 0 14px;
+}
+
+/* --- COMPÉTENCES : rangées qui défilent --- */
+.skills {
+    margin-top: 5.4vh; /* descend les skills : leur bas tombe sur le bas de l'ASCII */
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skill-row-title {
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    opacity: 0.6;
+    margin-bottom: 4px;
+}
+
+.marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.marquee-track.to-left {
+    animation-name: marqueeLeft;
+}
+
+.marquee-track.to-right {
+    animation-name: marqueeRight;
+}
+
+.marquee:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes marqueeLeft {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes marqueeRight {
+    from {
+        transform: translateX(-50%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+        animation: none;
+    }
+}
+
+.skill {
+    flex: 0 0 160px;
+    /* = TILE_W dans skills.js */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.skill-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.skill-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* couleurs d'origine par défaut */
+    transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* certaines icônes sont forcées en blanc (même au survol) : sombre en thème clair */
+.skill-icon img.is-white {
+    filter: brightness(0) invert(1);
+}
+
+body.light-theme .skill-icon img.is-white {
+    filter: brightness(0);
+}
+
+.skill:hover .skill-icon img {
+    transform: translateY(-3px);
+}
+
+/* tuile "monogramme" quand aucune icône n'est dispo */
+.skill-icon.is-mono {
+    border: 1px solid currentColor;
+    border-radius: 10px;
+    font-size: 1.8rem;
+    opacity: 0.85;
+}
+
+.skill-name {
+    font-size: 18px;
+    opacity: 0.8;
+    line-height: 1.2;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.3);
+    padding: 10px 0;
+}
+
+/* --- SECTION PROJETS --- */
+.project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+    /* Espace entre les projets */
+}
+
+.project-item {
+    display: grid;
+    /* Numéro au-dessus des infos (colonne 1), lien centré à droite (colonne 2) */
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 40px;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 40px;
+    transition: all 0.3s ease;
+}
+
+.project-item .p-num {
+    grid-column: 1;
+    grid-row: 1;
+    margin-bottom: 8px;
+}
+
+.project-item .p-info {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.project-item .p-link {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: center;
+    justify-self: end;
+}
+
+/* remplacé par la preview au survol */
+.project-item .p-img-placeholder {
+    display: none;
+}
+
+.project-item:hover {
+    border-color: #fff;
+}
+
+.p-num {
+    font-family: "Offbit";
+    color: #555;
+    font-size: 18px;
+}
+
+.p-info h3 {
+    font-family: "Satoshi-Variable";
+    font-size: 5rem;
+    margin: 0;
+}
+
+.p-info p {
+    font-size: 32px;
+    margin: 10px 0 0;
+}
+
+.p-link {
+    font-family: "Satoshi-Variable", sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.6rem;
+    text-align: right;
+}
+
+/* --- FOOTER --- */
+.huge-text {
+    font-family: "Satoshi-Variable";
+    font-size: 10vw;
+    /* Responsive huge text */
+    text-align: center;
+    line-height: 1;
+    font-weight: 300;
+}
+
+.email-link {
+    display: block;
+    text-align: center;
+    font-family: "Offbit";
+    color: #fff;
+    font-size: 2rem;
+    margin-top: 20px;
+    text-decoration: none;
+}
+
+.email-link:hover {
+    animation: glow 1s infinite;
+    /* Réutilisation de ton animation existante */
+}
