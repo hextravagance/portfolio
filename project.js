@@ -162,10 +162,13 @@
 
     // --- ÉVÉNEMENTS ---
     items.forEach((el, i) => {
-        el.style.cursor = 'pointer';
-        el.addEventListener('click', (e) => {
-            const a = e.target.closest('a');
-            if (a) e.preventDefault(); // le lien ACCÈS ouvre la page projet
+        const link = el.querySelector('.p-link');
+        if (!link) return;
+        link.style.cursor = 'pointer';
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const preview = document.getElementById('project-preview');
+            if (preview) preview.classList.remove('is-visible');
             open(i);
         });
     });

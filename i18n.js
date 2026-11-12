@@ -1,4 +1,4 @@
-﻿// --- LANGUE (FR / EN) -------------------------------------------------------
+// --- LANGUE (FR / EN) -------------------------------------------------------
 // Maj droite (hero de l'index uniquement) ouvre un champ : taper "eng" recharge le site en anglais,
 // "fr" revient au français. La langue est mémorisée (localStorage) et reprise par photos.html.
 // Les textes français du HTML sont traduits via ce dictionnaire (clé = texte FR, espaces normalisés).
@@ -112,6 +112,8 @@
         if (fade) gsap.to(fade, { opacity: 1, duration: 0.4, ease: 'power2.inOut', onComplete: () => location.reload() });
         else location.reload();
     }
+    window.setLang = setLang;
+    window.toggleLang = () => setLang(window.LANG === 'en' ? 'fr' : 'en');
     // ouvrir un site externe dans un NOUVEL onglet (la page actuelle reste en place), puis refermer l'invite
     function go(url) {
         window.open(url, '_blank', 'noopener,noreferrer');

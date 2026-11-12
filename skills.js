@@ -1,4 +1,4 @@
-﻿// Rangées d'icônes qui défilent (STATUS).
+// Rangées d'icônes qui défilent (STATUS).
 // icon = nom Devicon (https://devicon.dev) ; white: true = icône en blanc (même au survol),
 // sinon elle garde ses couleurs d'origine. Les rangées alternent : gauche, droite, gauche...
 // Si l'icône Devicon n'existe pas (404), une tuile "monogramme" (mono) est affichée à la place,
@@ -92,34 +92,47 @@ function buildSkills() {
     if (!root) return;
     root.innerHTML = '';
     const width = root.clientWidth || 600;
+    const isMobile = window.innerWidth <= 768;
+    const tileW = isMobile ? 100 : TILE_W;
+    let dirIdx = 0;
 
-    SKILL_ROWS.forEach((row, i) => {
+    SKILL_ROWS.forEach((row) => {
         const wrap = document.createElement('div');
         wrap.className = 'skill-row';
 
         const title = document.createElement('div');
         title.className = 'skill-row-title';
         title.textContent = row.title;
+        wrap.appendChild(title);
 
-        const marquee = document.createElement('div');
-        marquee.className = 'marquee';
+        const subRowCount = isMobile ? 2 : 1;
+        const chunkSize = Math.ceil(row.items.length / subRowCount);
 
-        const track = document.createElement('div');
-        track.className = 'marquee-track ' + (i % 2 === 0 ? 'to-left' : 'to-right');
+        for (let rIdx = 0; rIdx < subRowCount; rIdx++) {
+            const subItems = row.items.slice(rIdx * chunkSize, (rIdx + 1) * chunkSize);
+            if (!subItems.length) continue;
 
-        // Un "set" doit être plus large que la zone visible pour boucler sans trou
-        const reps = Math.max(1, Math.ceil(width / (row.items.length * TILE_W)));
-        const set = [];
-        for (let r = 0; r < reps; r++) row.items.forEach(s => set.push(s));
-        // Deux sets identiques : la boucle translate de -50% (= un set) en continu
-        for (let k = 0; k < 2; k++) set.forEach(s => track.appendChild(skillTile(s)));
+            const marquee = document.createElement('div');
+            marquee.className = 'marquee';
 
-        // Vitesse constante quelle que soit la longueur du set
-        const duration = Math.max(12, set.length * 1.6);
-        track.style.animationDuration = duration + 's';
+            const track = document.createElement('div');
+            track.className = 'marquee-track ' + (dirIdx++ % 2 === 0 ? 'to-left' : 'to-right');
 
-        marquee.appendChild(track);
-        wrap.append(title, marquee);
+            // Un "set" doit être plus large que la zone visible pour boucler sans trou
+            const reps = Math.max(1, Math.ceil(width / (subItems.length * tileW)));
+            const set = [];
+            for (let r = 0; r < reps; r++) subItems.forEach(s => set.push(s));
+            // Deux sets identiques : la boucle translate de -50% (= un set) en continu
+            for (let k = 0; k < 2; k++) set.forEach(s => track.appendChild(skillTile(s)));
+
+            // Vitesse constante quelle que soit la longueur du set
+            const duration = Math.max(12, set.length * 1.6);
+            track.style.animationDuration = duration + 's';
+
+            marquee.appendChild(track);
+            wrap.appendChild(marquee);
+        }
+
         root.appendChild(wrap);
     });
 }

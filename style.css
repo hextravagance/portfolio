@@ -925,3 +925,182 @@ body.light-theme .skill-icon img.is-white {
     animation: glow 1s infinite;
     /* Réutilisation de ton animation existante */
 }
+
+/* ============================================================
+   RESPONSIVE (Référence iPhone 14 Pro Max : 430 × 932 px)
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Curseur adapté à la taille mobile */
+    #custom-cursor {
+        width: 16px;
+        height: 16px;
+        border-width: 1px;
+    }
+
+    body.light-theme #custom-cursor {
+        border-width: 1.5px;
+    }
+
+    #custom-cursor.hover-link {
+        width: 28px;
+        height: 28px;
+    }
+
+    #custom-cursor.hover-ascii {
+        width: 10px;
+        height: 10px;
+    }
+
+    /* --- HERO PAGE --- */
+    /* Retirer les popups */
+    .info,
+    .info.i1,
+    .info.i2,
+    .info.i3 {
+        display: none !important;
+    }
+
+    #logo {
+        width: 46px;
+        top: 18px;
+        left: 20px;
+    }
+
+    /* Réduire la font du menu et retirer l'animation de hover */
+    #main-menu {
+        left: 20px;
+        bottom: 24px;
+        gap: 14px;
+        font-size: 26px;
+    }
+
+    #main-menu a .default span,
+    #main-menu a:hover .default span,
+    #main-menu a:not(:hover) .default span {
+        animation: none !important;
+        translate: 0 0 !important;
+    }
+
+    #main-menu a .hover {
+        display: none !important;
+    }
+
+    /* Garder seulement la flèche de "Mes projets" et augmenter sa taille */
+    #cta {
+        right: 24px;
+        bottom: 20px;
+        font-size: 0;
+        letter-spacing: 0;
+    }
+
+    #cta::after {
+        content: "↓";
+        font-size: 54px;
+        line-height: 1;
+        display: inline-block;
+    }
+
+    /* --- SECTIONS & 01. STATUS --- */
+    section.panel {
+        padding: 36px 20px;
+    }
+
+    /* Réduire la taille de glitch-text */
+    h2,
+    .glitch-text {
+        font-size: 2.2rem;
+    }
+
+    /* Retirer status-ascii et son canvas */
+    #status-ascii,
+    #status-canvas {
+        display: none !important;
+    }
+
+    /* Réduire la taille et font-size de bio-grid */
+    .bio-grid {
+        width: 100%;
+        margin: 0;
+        top: 0;
+        gap: 28px;
+        font-size: 1rem;
+    }
+
+    .bio-text p {
+        font-size: 18px;
+        line-height: 1.45;
+        margin: 0 0 12px;
+    }
+
+    /* Skills sur 2 rangées par catégorie */
+    .skills {
+        margin-top: 12px;
+        gap: 20px;
+    }
+
+    .skill-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .skill {
+        flex: 0 0 100px;
+        gap: 6px;
+    }
+
+    .skill-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .skill-name {
+        font-size: 14px;
+    }
+
+    /* --- 02. ARCHIVES --- */
+    #project-preview {
+        width: calc(100vw - 32px);
+        max-width: 360px;
+    }
+
+    .project-list {
+        gap: 48px;
+    }
+
+    .project-item {
+        column-gap: 16px;
+        padding-bottom: 24px;
+    }
+
+    .project-item .p-info {
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+    }
+
+    .p-num {
+        font-size: 14px;
+    }
+
+    .p-info h3 {
+        font-size: 2.2rem;
+    }
+
+    .p-info p {
+        font-size: 18px;
+        margin: 6px 0 0;
+        line-height: 1.35;
+    }
+
+    .p-link {
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+
+    /* --- LET'S TALK --- */
+    .email-link {
+        font-size: 18px;
+        margin-top: 16px;
+    }
+}

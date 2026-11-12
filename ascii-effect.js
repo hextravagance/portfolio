@@ -56,8 +56,10 @@ class AsciiEffect {
         // Hover detection sur la zone du logo ASCII
         document.addEventListener('mousemove', (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
+            const isMobile = rect.width <= 768;
+            const offsetY = isMobile ? -40 : this.options.offsetY;
+            const centerX = rect.left + rect.width / 2 + this.options.offsetX;
+            const centerY = rect.top + rect.height / 2 + offsetY;
             const radius = Math.min(rect.width, rect.height) * 0.22;
             const dx = e.clientX - centerX;
             const dy = e.clientY - centerY;
@@ -65,6 +67,23 @@ class AsciiEffect {
             this.isHovered = Math.sqrt(dx * dx + dy * dy) < radius;
             if (this.isHovered !== wasHovered) {
                 document.body.classList.toggle('ascii-hovered', this.isHovered);
+            }
+        });
+
+        // En responsive : clic sur l'ASCII art du hero => bascule la page en anglais (ou retour FR)
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth > 768) return;
+            if ((window.scrollY || document.documentElement.scrollTop || 0) > window.innerHeight * 0.5) return;
+            if (e.target.closest('a, button, #logo, #cta, #main-menu, #lang-term')) return;
+            const rect = this.canvas.getBoundingClientRect();
+            const offsetY = -40;
+            const centerX = rect.left + rect.width / 2 + this.options.offsetX;
+            const centerY = rect.top + rect.height / 2 + offsetY;
+            const radius = Math.min(rect.width, rect.height) * 0.32;
+            const dx = e.clientX - centerX;
+            const dy = e.clientY - centerY;
+            if (Math.sqrt(dx * dx + dy * dy) < radius && typeof window.toggleLang === 'function') {
+                window.toggleLang();
             }
         });
 
@@ -154,7 +173,9 @@ class AsciiEffect {
         const rect = this.container.getBoundingClientRect();
         this.canvas.width = rect.width;
         this.canvas.height = rect.height;
-        this.ctx.font = `bold ${this.options.fontSize}px "Courier New", monospace`;
+        const isMobile = rect.width <= 768;
+        const fs = isMobile ? Math.max(7, Math.round(this.options.fontSize * 0.65)) : this.options.fontSize;
+        this.ctx.font = `bold ${fs}px "Courier New", monospace`;
         this.ctx.textBaseline = 'middle';
         this.ctx.textAlign = 'center';
     }
@@ -221,12 +242,14 @@ class AsciiEffect {
             requestAnimationFrame(() => this.animate());
             return;
         }
+        const isMobile = this.canvas.width <= 768;
+        const mobileScale = isMobile ? 0.6 : 1;
         const gridWidth = this.asciiGrid[0].length;
         const gridHeight = this.asciiGrid.length;
         const charWidth = this.options.fontSize * 0.65;
         const charHeight = this.options.fontSize;
         const centerX = this.canvas.width / 2 + this.options.offsetX;
-        const centerY = this.canvas.height / 2 + this.options.offsetY;
+        const centerY = this.canvas.height / 2 + (isMobile ? -40 : this.options.offsetY);
         const extrusionDepth = this.options.extrusionDepth;
         const extrusionLayers = this.options.extrusionLayers;
 
@@ -239,7 +262,7 @@ class AsciiEffect {
         const cosX = Math.cos(angleX);
         const sinX = Math.sin(angleX);
         const perspective = 500;
-        const zoomScale = this.hoverZoom;
+        const zoomScale = this.hoverZoom * mobileScale;
         const points = [];
 
         for (let y = 0; y < gridHeight; y++) {

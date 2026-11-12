@@ -1,4 +1,4 @@
-﻿// --- CONFIGURATION ---
+// --- CONFIGURATION ---
 const DEBUG = false; // METTRE A FALSE QUAND TOUT EST BON
 const SPEED = 15;   // Vitesse de déplacement
 
@@ -511,24 +511,30 @@ if (customCursor && typeof gsap !== 'undefined') {
     const xSet = gsap.quickSetter(customCursor, "left", "px");
     const ySet = gsap.quickSetter(customCursor, "top", "px");
 
-    window.addEventListener("mousemove", e => {
+    const moveCursor = (clientX, clientY) => {
         if (customCursor.style.opacity === '0') customCursor.style.opacity = '1';
-        
-        // Animation de suivi avec GSAP (plus fluide que lerp manuel)
         gsap.to(customCursor, {
             xPercent: -50,
             yPercent: -50,
-            left: e.clientX,
-            top: e.clientY,
+            left: clientX,
+            top: clientY,
             duration: 0.5,
             ease: "power3.out",
             overwrite: "auto"
         });
-    });
+    };
+
+    window.addEventListener("mousemove", e => moveCursor(e.clientX, e.clientY));
+    window.addEventListener("touchstart", e => {
+        if (e.touches && e.touches[0]) moveCursor(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", e => {
+        if (e.touches && e.touches[0]) moveCursor(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
 
     // Effets au survol
     // (classe CSS .hover-link : couleurs gérées par le thème clair/sombre)
-    const HOVER_SEL = 'a, button, #logo, #cta, .p-link, .project-item, .photo-item';
+    const HOVER_SEL = 'a, button, #logo, #cta, .p-link, .photo-item';
     document.addEventListener('mouseover', (e) => {
         if (e.target.closest(HOVER_SEL)) customCursor.classList.add('hover-link');
     });
@@ -568,19 +574,7 @@ if (customCursor && typeof gsap !== 'undefined') {
             px(x); py(y);
         };
 
-        window.addEventListener('mousemove', (e) => {
-            if (!preview.classList.contains('is-visible')) { lastX = e.clientX; return; }
-            place(e.clientX, e.clientY);
-            // Petite inclinaison selon la vitesse horizontale, retour à plat à l'arrêt
-            const dx = e.clientX - lastX; lastX = e.clientX;
-            rot(Math.max(-10, Math.min(10, dx * 0.5)));
-            clearTimeout(rotReset);
-            rotReset = setTimeout(() => rot(0), 80);
-        });
-
-        document.addEventListener('mouseover', (e) => {
-            const item = e.target.closest('.project-item');
-            if (!item || item.contains(e.relatedTarget)) return;
+        const showPreview = (item, cx, cy) => {
             const src = item.dataset.preview;
             pImg.onload = null;
             pImg.onerror = null;
@@ -621,14 +615,88 @@ if (customCursor && typeof gsap !== 'undefined') {
                     showImg();
                 }
             }
-            gsap.set(preview, { x: e.clientX + OFFSET, y: e.clientY });
-            place(e.clientX, e.clientY);
+            gsap.set(preview, { x: cx + OFFSET, y: cy });
+            place(cx, cy);
             preview.classList.add('is-visible');
+        };
+
+        const hidePreview = () => {
+            preview.classList.remove('is-visible');
+            pVid.pause();
+        };
+
+        window.addEventListener('mousemove', (e) => {
+            if (!preview.classList.contains('is-visible')) { lastX = e.clientX; return; }
+            place(e.clientX, e.clientY);
+            // Petite inclinaison selon la vitesse horizontale, retour à plat à l'arrêt
+            const dx = e.clientX - lastX; lastX = e.clientX;
+            rot(Math.max(-10, Math.min(10, dx * 0.5)));
+            clearTimeout(rotReset);
+            rotReset = setTimeout(() => rot(0), 80);
+        });
+
+        // Desktop (> 768px) : affichage au survol
+        document.addEventListener('mouseover', (e) => {
+            if (window.innerWidth <= 768) return;
+            const item = e.target.closest('.project-item');
+            if (!item || item.contains(e.relatedTarget)) return;
+            showPreview(item, e.clientX, e.clientY);
         });
 
         document.addEventListener('mouseout', (e) => {
+            if (window.innerWidth <= 768) return;
             const item = e.target.closest('.project-item');
-            if (item && !item.contains(e.relatedTarget)) preview.classList.remove('is-visible');
+            if (item && !item.contains(e.relatedTarget)) hidePreview();
+        });
+
+        // Mobile / Responsive (<= 768px) : affichage uniquement en restant appuyé longtemps sur .p-info
+        let pressTimer = null;
+        let pressStartX = 0, pressStartY = 0;
+        const LONG_PRESS_MS = 400;
+
+        const cancelPress = () => {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+            if (window.innerWidth <= 768) hidePreview();
+        };
+
+        document.addEventListener('pointerdown', (e) => {
+            if (window.innerWidth > 768) return;
+            const pInfo = e.target.closest('.p-info');
+            if (!pInfo) return;
+            const item = pInfo.closest('.project-item');
+            if (!item) return;
+            pressStartX = e.clientX;
+            pressStartY = e.clientY;
+            clearTimeout(pressTimer);
+            pressTimer = setTimeout(() => {
+                pressTimer = null;
+                showPreview(item, pressStartX, pressStartY);
+            }, LONG_PRESS_MS);
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (window.innerWidth > 768) return;
+            if (pressTimer) {
+                if (Math.hypot(e.clientX - pressStartX, e.clientY - pressStartY) > 12) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            } else if (preview.classList.contains('is-visible')) {
+                place(e.clientX, e.clientY);
+            }
+        });
+
+        document.addEventListener('pointerup', cancelPress);
+        document.addEventListener('pointercancel', cancelPress);
+        document.addEventListener('touchend', cancelPress, { passive: true });
+        document.addEventListener('touchcancel', cancelPress, { passive: true });
+        document.addEventListener('contextmenu', (e) => {
+            if (window.innerWidth <= 768 && e.target.closest('.p-info')) {
+                e.preventDefault();
+            }
         });
 
         // Au scroll la souris ne bouge pas : mouseout n'est jamais déclenché.
@@ -636,12 +704,17 @@ if (customCursor && typeof gsap !== 'undefined') {
         let mouseX = -1, mouseY = -1, scrollTick = false;
         window.addEventListener('mousemove', (e) => { mouseX = e.clientX; mouseY = e.clientY; });
         window.addEventListener('scroll', () => {
+            if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+            if (window.innerWidth <= 768) {
+                if (preview.classList.contains('is-visible')) hidePreview();
+                return;
+            }
             if (scrollTick || !preview.classList.contains('is-visible')) return;
             scrollTick = true;
             requestAnimationFrame(() => {
                 scrollTick = false;
                 const under = document.elementFromPoint(mouseX, mouseY);
-                if (!under || !under.closest('.project-item')) preview.classList.remove('is-visible');
+                if (!under || !under.closest('.project-item')) hidePreview();
             });
         }, { passive: true });
     }
@@ -740,15 +813,18 @@ if (customCursor && typeof gsap !== 'undefined') {
     // Collect all hero text elements that should scramble
     function getHeroTextElements() {
         const els = [];
+        const isMobile = window.innerWidth <= 768;
         
-        // CTA button
+        // CTA button (desktop only; on mobile it only displays the arrow via ::after)
         const cta = document.getElementById('cta');
-        if (cta) els.push(cta);
+        if (cta && !isMobile) els.push(cta);
         
-        // Info text elements (the floating popups)
-        document.querySelectorAll('.info .text').forEach(el => {
-            if (el.textContent.trim().length > 0) els.push(el);
-        });
+        // Info text elements (the floating popups, desktop only)
+        if (!isMobile) {
+            document.querySelectorAll('.info .text').forEach(el => {
+                if (el.textContent.trim().length > 0) els.push(el);
+            });
+        }
         
         // Menu items (the visible text spans)
         document.querySelectorAll('#main-menu a .default').forEach(el => {

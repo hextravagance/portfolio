@@ -1,4 +1,4 @@
-﻿// --- PAGE PHOTOS ----------------------------------------------------------
+// --- PAGE PHOTOS ----------------------------------------------------------
 // Dépose tes photos dans img/photos/ et liste-les ici (les 8 premières vont dans
 // le bento, et toutes les photos s'affichent dans la grille en cascade).
 // Une photo introuvable affiche une tuile placeholder.
@@ -150,6 +150,20 @@ document.querySelectorAll('.gallery__item img, .ph-frame img').forEach((img) => 
 // Timeline qui porte toutes les animations de flip (pause = freeze)
 const flipTL = gsap.timeline();
 const FREEZE_AT = 0.6; // progression du scroll du bento à partir de laquelle les flips se figent
+let freezeWanted = false;   // le scroll demande le freeze
+let activeFlips = 0;        // flips en cours (on ne fige jamais une tuile à mi-rotation)
+function flipsAtRest() {
+    return [...document.querySelectorAll('.is-flip .flip-inner')].every((el) => {
+        const r = Math.abs(gsap.getProperty(el, 'rotationX')) % 180;
+        return r < 0.01 || r > 179.99;
+    });
+}
+function syncFreeze() {
+    const p = freezeWanted && activeFlips <= 0 && flipsAtRest();
+    if (p !== flipTL.paused()) flipTL.paused(p);
+}
+// vérifié à chaque frame : la pause n'arrive que quand TOUTES les tuiles sont bien à plat
+gsap.ticker.add(() => { if (freezeWanted && !flipTL.paused()) syncFreeze(); });
 
 // --- tuiles du bento qui se retournent (réveil rétro) et montrent une autre photo au hasard ---
 (function initFlips() {
@@ -162,6 +176,8 @@ const FREEZE_AT = 0.6; // progression du scroll du bento à partir de laquelle l
     }
 
     function flipOnce(item) {
+        // freeze demandé : ne pas démarrer un nouveau flip, on réessaie juste après
+        if (freezeWanted) { flipTL.call(() => flipOnce(item), null, flipTL.time() + 0.5); return; }
         const inner = item.querySelector('.flip-inner');
         const showingFront = !item._flipped;
         const hidden = item.querySelector(showingFront ? '.flip-back' : '.flip-front');
@@ -175,11 +191,15 @@ const FREEZE_AT = 0.6; // progression du scroll du bento à partir de laquelle l
 
         // tout passe par flipTL : le mettre en pause fige flips en cours ET prochains flips
         const t = flipTL.time();
+        activeFlips++;
         flipTL.to(inner, {
             rotationX: '+=180',
-            duration: 1.1,
-            ease: 'power3.inOut',
-            onComplete: () => { visible.delete(old); item._idx = idx; item._flipped = !item._flipped; }
+            duration: 1.0,
+            ease: 'sine.inOut', // sans perspective, la compression suit un cosinus : sine donne un mouvement plus doux
+            onComplete: () => {
+                visible.delete(old); item._idx = idx; item._flipped = !item._flipped;
+                activeFlips = Math.max(0, activeFlips - 1); syncFreeze();
+            }
         }, t);
         flipTL.call(() => flipOnce(item), null, t + 2.5 + Math.random() * 4);
     }
@@ -221,8 +241,8 @@ function createBento() {
                 pin: el.parentNode,
                 // photo 3 (quasi) plein écran : les flips se figent ; on remonte : ils reprennent
                 onUpdate: (self) => {
-                    const frozen = self.progress >= FREEZE_AT;
-                    if (frozen !== flipTL.paused()) flipTL.paused(frozen);
+                    freezeWanted = self.progress >= FREEZE_AT;
+                    syncFreeze();
                 }
             }
         });
@@ -244,13 +264,79 @@ ScrollTrigger.batch('.ph-item', {
     onEnter: (batch) => gsap.to(batch, { autoAlpha: 1, y: 0, stagger: 0.2, duration: 1, ease: 'sine.out' })
 });
 
+// --- 3. popup / lightbox au clic sur une photo de l'archive ---
+const popup = document.createElement('div');
+popup.id = 'ph-popup';
+popup.setAttribute('aria-hidden', 'true');
+const popupImg = document.createElement('img');
+popupImg.className = 'ph-popup-img';
+popupImg.alt = '';
+popup.appendChild(popupImg);
+document.body.appendChild(popup);
+
+let popupOpen = false;
+function openPhotoPopup(src, alt) {
+    if (!src || popupOpen) return;
+    popupOpen = true;
+    popupImg.src = src;
+    popupImg.alt = alt || '';
+    popup.classList.add('is-open');
+    popup.setAttribute('aria-hidden', 'false');
+    lenis.stop();
+    gsap.killTweensOf([popup, popupImg]);
+    gsap.set(popup, { visibility: 'visible' });
+    gsap.fromTo(popup, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: 'power2.out' });
+    gsap.fromTo(popupImg, { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'power3.out' });
+}
+
+function closePhotoPopup() {
+    if (!popupOpen) return;
+    popupOpen = false;
+    popup.classList.remove('is-open');
+    popup.setAttribute('aria-hidden', 'true');
+    gsap.killTweensOf([popup, popupImg]);
+    gsap.to(popupImg, { scale: 0.94, opacity: 0, duration: 0.22, ease: 'power2.in' });
+    gsap.to(popup, {
+        opacity: 0,
+        duration: 0.25,
+        ease: 'power2.in',
+        onComplete: () => {
+            gsap.set(popup, { visibility: 'hidden' });
+            popupImg.removeAttribute('src');
+            lenis.start();
+        }
+    });
+}
+
+grid.addEventListener('click', (e) => {
+    const item = e.target.closest('.ph-item');
+    if (!item) return;
+    const img = item.querySelector('img');
+    if (!img) return;
+    openPhotoPopup(item.dataset.src || img.getAttribute('src'), img.alt);
+});
+
+// Appuyer en dehors de l'image referme la popup
+popup.addEventListener('click', (e) => {
+    if (!e.target.closest('.ph-popup-img')) {
+        closePhotoPopup();
+    }
+});
+
+window.addEventListener('keydown', (e) => {
+    if (popupOpen && e.key === 'Escape') closePhotoPopup();
+});
+
 // --- curseur custom ---
 const cur = document.getElementById('custom-cursor');
 cur.style.opacity = '0';
-window.addEventListener('mousemove', (e) => {
+const moveCur = (cx, cy) => {
     if (cur.style.opacity === '0') cur.style.opacity = '1';
-    gsap.to(cur, { xPercent: -50, yPercent: -50, left: e.clientX, top: e.clientY, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
-});
+    gsap.to(cur, { xPercent: -50, yPercent: -50, left: cx, top: cy, duration: 0.5, ease: 'power3.out', overwrite: 'auto' });
+};
+window.addEventListener('mousemove', (e) => moveCur(e.clientX, e.clientY));
+window.addEventListener('touchstart', (e) => { if (e.touches && e.touches[0]) moveCur(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+window.addEventListener('touchmove', (e) => { if (e.touches && e.touches[0]) moveCur(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
 document.addEventListener('mouseover', (e) => { if (e.target.closest('a, .ph-item')) cur.classList.add('hover-link'); });
 document.addEventListener('mouseout', (e) => { if (e.target.closest('a, .ph-item')) cur.classList.remove('hover-link'); });
 
