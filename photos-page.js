@@ -154,8 +154,7 @@ let freezeWanted = false;   // le scroll demande le freeze
 let activeFlips = 0;        // flips en cours (on ne fige jamais une tuile à mi-rotation)
 function flipsAtRest() {
     return [...document.querySelectorAll('.is-flip .flip-inner')].every((el) => {
-        const r = Math.abs(gsap.getProperty(el, 'rotationX')) % 180;
-        return r < 0.01 || r > 179.99;
+        return Math.abs(gsap.getProperty(el, 'scaleY') - 1) < 0.001 && Math.abs(gsap.getProperty(el, 'opacity') - 1) < 0.001;
     });
 }
 function syncFreeze() {
@@ -192,15 +191,23 @@ gsap.ticker.add(() => { if (freezeWanted && !flipTL.paused()) syncFreeze(); });
         // tout passe par flipTL : le mettre en pause fige flips en cours ET prochains flips
         const t = flipTL.time();
         activeFlips++;
+        // flip "à plat" en 2D (scaleY 1 → 0 → 1) : même rendu qu'une rotation sans perspective,
+        // mais sans 3D donc fiable et fluide sur iOS ; la face change quand la tuile est écrasée
+        // mobile : simple fondu (opacity 1 → 0 → 1) à la place de l'écrasement
+        const mobile = window.matchMedia('(max-width: 768px)').matches;
+        const away = mobile ? { opacity: 0 } : { scaleY: 0 };
+        const back = mobile ? { opacity: 1 } : { scaleY: 1 };
+        flipTL.to(inner, { ...away, duration: 0.5, ease: mobile ? 'power1.in' : 'sine.in' }, t);
+        flipTL.call(() => item.classList.toggle('is-back', showingFront), null, t + 0.5);
         flipTL.to(inner, {
-            rotationX: '+=180',
-            duration: 1.0,
-            ease: 'sine.inOut', // sans perspective, la compression suit un cosinus : sine donne un mouvement plus doux
+            ...back,
+            duration: 0.5,
+            ease: mobile ? 'power1.out' : 'sine.out',
             onComplete: () => {
                 visible.delete(old); item._idx = idx; item._flipped = !item._flipped;
                 activeFlips = Math.max(0, activeFlips - 1); syncFreeze();
             }
-        }, t);
+        }, t + 0.5);
         flipTL.call(() => flipOnce(item), null, t + 2.5 + Math.random() * 4);
     }
 

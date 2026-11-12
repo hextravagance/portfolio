@@ -125,7 +125,6 @@ body.photos-page .ph-header .ph-count {
 .flip-inner {
     position: absolute;
     inset: 0;
-    transform-style: preserve-3d;
     will-change: transform;
 }
 
@@ -134,13 +133,12 @@ body.photos-page .ph-header .ph-count {
     inset: 0;
     overflow: hidden;
     background: #111;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
 }
 
-.flip-back {
-    transform: rotateX(180deg);
-}
+/* flip 2D : une seule face visible à la fois (la classe is-back est posée par photos-page.js) */
+.flip-back { visibility: hidden; }
+.is-back .flip-front { visibility: hidden; }
+.is-back .flip-back { visibility: visible; }
 
 .gallery--bento {
     display: grid;
