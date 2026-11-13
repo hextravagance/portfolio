@@ -2,6 +2,7 @@
     font-family: "Offbit";
     src: url("fonts/OffBit-Dot.ttf") format("truetype");
     font-weight: normal;
+    font-display: swap;
 }
 
 @font-face {

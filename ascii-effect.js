@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ASCII Art Effect with Real 3D Perspective + Gradient Colors
  * Smooth continuous rotation with animated gradient on characters
  */
@@ -90,14 +90,30 @@ class AsciiEffect {
         try {
             await this.loadSVG();
             this.ready = true;
-            console.log('ASCII Effect loaded:', this.asciiGrid.length, 'x', this.asciiGrid[0]?.length);
         } catch (e) {
             console.error('Failed to load SVG', e);
             this.createFallbackPattern();
             this.ready = true;
         }
 
-        this.animate();
+        // Boucle d'animation : en pause quand l'onglet est masqué
+        this.rafId = 0;
+        this.lastT = 0;
+        this.loop = (now) => {
+            this.rafId = 0;
+            if (document.hidden) return;
+            this.rafId = requestAnimationFrame(this.loop);
+            // mobile : 30 fps max (le canvas est coûteux et l'écran n'y gagne rien)
+            const minFrame = this.canvas.width <= 768 ? 30 : 0;
+            if (this.lastT && now - this.lastT < minFrame) return;
+            const dt = this.lastT ? Math.min((now - this.lastT) / 1000, 0.05) : 0.016;
+            this.lastT = now;
+            this.draw(dt);
+        };
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && !this.rafId) { this.lastT = 0; this.rafId = requestAnimationFrame(this.loop); }
+        });
+        this.rafId = requestAnimationFrame(this.loop);
     }
 
     async loadSVG() {
@@ -222,26 +238,28 @@ class AsciiEffect {
         };
     }
 
-    animate() {
-        const deltaTime = 0.016;
-        this.time += deltaTime;
+    draw(dt) {
+        const k = dt / 0.016; // 1 à 60 fps : garde la même vitesse visuelle quel que soit le framerate
+        const ctx = this.ctx;
         const eeActive = this.easterEggActive;
         const targetZoom = (!eeActive && this.isHovered) ? 1.4 : 1;
         const targetRotMult = eeActive ? 3 : (this.isHovered ? 3 : 1);
-        this.hoverZoom += (targetZoom - this.hoverZoom) * 0.06;
-        this.hoverRotMult += (targetRotMult - this.hoverRotMult) * 0.08;
+        this.hoverZoom += (targetZoom - this.hoverZoom) * Math.min(1, 0.06 * k);
+        this.hoverRotMult += (targetRotMult - this.hoverRotMult) * Math.min(1, 0.08 * k);
         const targetValue = this.lightTheme ? 1 : 0;
-        this.themeValue += (targetValue - this.themeValue) * 0.1;
+        this.themeValue += (targetValue - this.themeValue) * Math.min(1, 0.1 * k);
         const bg = this.lightThemeBg;
-        const bgR = Math.floor(this.themeValue * bg.r);
-        const bgG = Math.floor(this.themeValue * bg.g);
-        const bgB = Math.floor(this.themeValue * bg.b);
-        this.ctx.fillStyle = `rgb(${bgR}, ${bgG}, ${bgB})`;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        if (!this.ready || !this.asciiGrid.length) {
-            requestAnimationFrame(() => this.animate());
-            return;
+        ctx.fillStyle = `rgb(${Math.floor(this.themeValue * bg.r)}, ${Math.floor(this.themeValue * bg.g)}, ${Math.floor(this.themeValue * bg.b)})`;
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        if (!this.ready || !this.asciiGrid.length) return;
+
+        // cellules visibles : listées une seule fois (plus de parcours de toute la grille à chaque frame)
+        if (!this.cells) {
+            this.cells = [];
+            for (const row of this.asciiGrid) for (const c of row) if (c.isVisible) this.cells.push(c);
         }
+        const cells = this.cells;
+
         const isMobile = this.canvas.width <= 768;
         const mobileScale = isMobile ? 0.6 : 1;
         const gridWidth = this.asciiGrid[0].length;
@@ -251,87 +269,98 @@ class AsciiEffect {
         const centerX = this.canvas.width / 2 + this.options.offsetX;
         const centerY = this.canvas.height / 2 + (isMobile ? -40 : this.options.offsetY);
         const extrusionDepth = this.options.extrusionDepth;
-        const extrusionLayers = this.options.extrusionLayers;
+        // mobile : moins de couches d'extrusion (4 au lieu de 8) = 2x moins de caractères à dessiner
+        const extrusionLayers = isMobile ? Math.max(2, Math.round(this.options.extrusionLayers / 2)) : this.options.extrusionLayers;
+        const nLayers = extrusionLayers + 1;
 
-        // Rotation continue (accélérée au hover)
-        this.rotationAngle += deltaTime * this.options.rotationSpeed * this.hoverRotMult;
-        const rotationY = this.rotationAngle;
+        this.rotationAngle += dt * this.options.rotationSpeed * this.hoverRotMult;
+        const cosY = Math.cos(this.rotationAngle);
+        const sinY = Math.sin(this.rotationAngle);
         const angleX = this.options.perspectiveAngleX;
-        const cosY = Math.cos(rotationY);
-        const sinY = Math.sin(rotationY);
         const cosX = Math.cos(angleX);
         const sinX = Math.sin(angleX);
         const perspective = 500;
         const zoomScale = this.hoverZoom * mobileScale;
-        const points = [];
 
-        for (let y = 0; y < gridHeight; y++) {
-            for (let x = 0; x < gridWidth; x++) {
-                const cell = this.asciiGrid[y][x];
-                if (!cell.isVisible) continue;
-                cell.charTimer += 0.15 + Math.random() * 0.1;
-                const relX = (x - gridWidth / 2) * charWidth;
-                const relY = (y - gridHeight / 2) * charHeight;
-                for (let layer = 0; layer <= extrusionLayers; layer++) {
-                    const z = -extrusionDepth / 2 + layer * (extrusionDepth / extrusionLayers);
-                    const x1 = relX * cosY + z * sinY;
-                    const z1 = -relX * sinY + z * cosY;
-                    const y1 = relY * cosX - z1 * sinX;
-                    const z2 = relY * sinX + z1 * cosX;
-                    const scale = (perspective / (perspective + z2)) * zoomScale;
-                    const screenX = centerX + x1 * scale;
-                    const screenY = centerY + y1 * scale;
-                    const char = this.getRandomChar(cell.charTimer + layer * 2, this.options.charChangeSpeed);
-                    const isFrontOrBack = (layer === 0 || layer === extrusionLayers);
-                    const depthRatio = Math.abs(layer - extrusionLayers / 2) / (extrusionLayers / 2);
-                    let baseColor;
-                    if (this.options.useGradient) {
-                        baseColor = this.getGradientColor(screenX, screenY, this.time);
-                    } else {
-                        const val = Math.floor(255 * (1 - this.themeValue));
-                        baseColor = { r: val, g: val, b: val };
-                    }
-                    if (this.easterEggProgress > 0.001) {
-                        const p = this.easterEggProgress;
-                        const ec = this.easterEggColor;
-                        baseColor = {
-                            r: Math.floor(baseColor.r + (ec.r - baseColor.r) * p),
-                            g: Math.floor(baseColor.g + (ec.g - baseColor.g) * p),
-                            b: Math.floor(baseColor.b + (ec.b - baseColor.b) * p)
-                        };
-                    }
+        // Couleur/alpha par couche (identique pour tous les points d'une couche hors dégradé) : 9 chaînes au lieu de milliers
+        const layerStyle = [];
+        for (let layer = 0; layer < nLayers; layer++) {
+            const isFrontOrBack = (layer === 0 || layer === extrusionLayers);
+            const depthRatio = Math.abs(layer - extrusionLayers / 2) / (extrusionLayers / 2);
+            const val = Math.floor(255 * (1 - this.themeValue));
+            let r = val, g = val, b = val;
+            if (this.easterEggProgress > 0.001) {
+                const p = this.easterEggProgress, ec = this.easterEggColor;
+                r = Math.floor(r + (ec.r - r) * p);
+                g = Math.floor(g + (ec.g - g) * p);
+                b = Math.floor(b + (ec.b - b) * p);
+            }
+            let alpha = 0.95;
+            if (!isFrontOrBack) {
+                const f = 0.3 + depthRatio * 0.4;
+                r = Math.floor(r * f); g = Math.floor(g * f); b = Math.floor(b * f);
+                alpha = 0.3 + depthRatio * 0.4;
+            }
+            layerStyle.push(`rgba(${r}, ${g}, ${b}, ${alpha})`);
+        }
 
-                    let color, alpha;
-                    if (isFrontOrBack) {
-                        color = baseColor;
-                        alpha = 0.95;
-                    } else {
-                        const darkFactor = 0.3 + depthRatio * 0.4;
-                        color = {
-                            r: Math.floor(baseColor.r * darkFactor),
-                            g: Math.floor(baseColor.g * darkFactor),
-                            b: Math.floor(baseColor.b * darkFactor)
-                        };
-                        alpha = 0.3 + depthRatio * 0.4;
-                    }
+        // buffers réutilisés d'une frame à l'autre (zéro allocation par point)
+        const total = cells.length * nLayers;
+        if (!this.buf || this.buf.cap < total) {
+            this.buf = {
+                cap: total,
+                xs: new Float32Array(total), ys: new Float32Array(total), zs: new Float32Array(total),
+                layer: new Uint8Array(total), ch: new Uint8Array(total), order: new Uint32Array(total)
+            };
+        }
+        const { xs, ys, zs, layer: ly, ch, order } = this.buf;
+        const chars = this.options.chars;
+        const nChars = chars.length - 1;
+        const speed = this.options.charChangeSpeed;
+        const zStep = extrusionDepth / extrusionLayers;
+        let n = 0, zMin = Infinity, zMax = -Infinity;
 
-                    points.push({
-                        x: screenX,
-                        y: screenY,
-                        z: z2,
-                        char,
-                        color,
-                        alpha
-                    });
-                }
+        for (let i = 0; i < cells.length; i++) {
+            const cell = cells[i];
+            cell.charTimer += (0.15 + Math.random() * 0.1) * k;
+            const relX = (cell.x - gridWidth / 2) * charWidth;
+            const relY = (cell.y - gridHeight / 2) * charHeight;
+            for (let layer = 0; layer < nLayers; layer++) {
+                const z = -extrusionDepth / 2 + layer * zStep;
+                const x1 = relX * cosY + z * sinY;
+                const z1 = -relX * sinY + z * cosY;
+                const y1 = relY * cosX - z1 * sinX;
+                const z2 = relY * sinX + z1 * cosX;
+                const scale = (perspective / (perspective + z2)) * zoomScale;
+                xs[n] = centerX + x1 * scale;
+                ys[n] = centerY + y1 * scale;
+                zs[n] = z2;
+                ly[n] = layer;
+                ch[n] = Math.floor(((cell.charTimer + layer * 2) * speed) % nChars);
+                if (z2 < zMin) zMin = z2;
+                if (z2 > zMax) zMax = z2;
+                n++;
             }
         }
-        points.sort((a, b) => b.z - a.z);
-        for (const point of points) {
-            this.ctx.fillStyle = `rgba(${point.color.r}, ${point.color.g}, ${point.color.b}, ${point.alpha})`;
-            this.ctx.fillText(point.char, point.x, point.y);
+
+        // tri par profondeur en O(n) (tri par seaux) au lieu d'un Array.sort sur des milliers d'objets : du plus loin au plus proche
+        const B = 512;
+        const counts = this.counts || (this.counts = new Uint32Array(B + 1));
+        counts.fill(0);
+        const inv = zMax > zMin ? (B - 1) / (zMax - zMin) : 0;
+        for (let i = 0; i < n; i++) counts[B - 1 - Math.floor((zs[i] - zMin) * inv) + 1]++;
+        for (let b = 1; b <= B; b++) counts[b] += counts[b - 1];
+        for (let i = 0; i < n; i++) order[counts[B - 1 - Math.floor((zs[i] - zMin) * inv)]++] = i;
+
+        let lastLayer = -1;
+        for (let j = 0; j < n; j++) {
+            const i = order[j];
+            if (ly[i] !== lastLayer) {
+                lastLayer = ly[i];
+                ctx.fillStyle = layerStyle[lastLayer];
+            }
+            ctx.fillText(chars[ch[i]], xs[i], ys[i]);
         }
-        requestAnimationFrame(() => this.animate());
     }
 }
 document.addEventListener('DOMContentLoaded', () => {

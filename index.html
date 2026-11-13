@@ -6,14 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>P+FLI+</title>
     <link rel="icon" id="favicon" type="image/svg+xml" href="img/favicon-light.svg">
+    <meta name="description" content="Portfolio de Nicolas, développeur et designer multimédia (BUT MMI) : projets web, 3D, VR et photos.">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preload" href="fonts/OffBit-Dot.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="satoshi.css">
     <link rel="stylesheet" href="project.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrambleTextPlugin.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.14.1/dist/ScrambleTextPlugin.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+    <script defer src="ascii-effect.js"></script>
+    <script defer src="i18n.js"></script>
+    <script defer src="ascii-status.js"></script>
+    <script defer src="skills.js"></script>
+    <script defer src="script.js"></script>
+    <script defer src="project.js"></script>
 </head>
 
 <body>
@@ -24,9 +34,7 @@
             preload="auto"></video></div>
     <div id="bg"></div>
 
-    <script src="ascii-effect.js"></script>
-
-    <img id="logo" src="img/ico.svg" alt="Logo">
+    <img id="logo" src="img/ico.svg" alt="Logo" width="60" height="60" fetchpriority="high">
 
     <nav id="main-menu">
         <a href="#presentation"></a>
@@ -149,12 +157,6 @@
         </section>
 
     </main>
-
-    <script src="i18n.js"></script>
-    <script src="ascii-status.js"></script>
-    <script src="skills.js"></script>
-    <script src="script.js"></script>
-    <script src="project.js"></script>
 
 </body>
 
